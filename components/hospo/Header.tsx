@@ -1,9 +1,6 @@
-'use client';
-
 import { useEffect, useRef, useState } from 'react';
 
 const LINKS = [
-  { href: '/tapro', label: 'Tapro' },
   { href: '#products', label: 'Products' },
   { href: '#solutions', label: 'Why Hospo Fresh' },
   { href: '#industries', label: 'Industries' },
@@ -42,7 +39,10 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="logo" src="/hospo-fresh-logo.png" alt="Hospo Fresh" />
           </a>
-          <a href="/tapro" className="tapro-mark desktop-only">
+          {/* No "desktop-only" here on purpose — this stays visible next to
+              the logo at every screen size, so it never gets buried inside
+              the hamburger menu on mobile. */}
+          <a href="/tapro" className="tapro-mark">
             Tapro
           </a>
           <nav className="nav">
@@ -65,10 +65,9 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
           </button>
         </header>
 
+        {/* Tapro is deliberately NOT repeated in here — it's already
+            permanently visible next to the logo above, on every screen size. */}
         <div className={`mobile-nav${menuOpen ? ' open' : ''}`}>
-          <a href="/tapro" className="tapro-mark" style={{ borderLeft: 'none', paddingLeft: 0 }}>
-            Tapro
-          </a>
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)}>
               {l.label}

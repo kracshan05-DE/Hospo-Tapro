@@ -37,6 +37,7 @@ header{position:relative;background:#fff;border-bottom:1px solid rgba(228,229,22
 .stat:last-child{border:0}
 .stat strong{display:block;font-size:20px;line-height:1.1;color:var(--green)}
 .stat span{color:var(--muted);font-size:12px}
+.tapro-mark{font-weight:700;font-size:13px;padding-left:12px;margin-left:2px;border-left:1px solid var(--line);text-transform:uppercase;letter-spacing:.5px}
 section{padding:90px 5%}
 .section-head{max-width:700px;margin-bottom:42px}
 .section-head h2{font-size:42px;line-height:1.1;margin:10px 0;color:#123d61}
