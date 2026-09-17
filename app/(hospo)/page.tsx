@@ -108,7 +108,7 @@ export default async function HomePage() {
               { title: 'Sauces & Condiments', desc: 'Essential pantry flavours.', img: 'https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=800&q=80' },
               { title: 'Frozen Foods', desc: 'Convenient ingredients for busy service.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80' },
               { title: 'Nuts & Dried Fruit', desc: 'For cooking, baking and serving.', img: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&w=800&q=80' },
-              { title: 'Packaging & Takeaway', desc: 'Practical solutions for takeaway service.', img: null },
+              { title: 'Packaging & Takeaway', desc: 'Practical solutions for takeaway service.', img: '/packaging-image.png' },
               { title: 'Hospitality Essentials', desc: 'Useful supplies for day-to-day operations.', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=800&q=80' },
             ].map((p) => (
               <div className="card" key={p.title}>

@@ -32,7 +32,7 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
     <>
       <header className={`site-header${solid ? ' solid' : ''}`}>
         <a href="#hero" className="logo-mark">
-          Tapro <span>Hospo Fresh</span>
+          Tapro 
         </a>
         <nav className="desktop-nav">
           <ul>
