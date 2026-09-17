@@ -54,9 +54,14 @@ export default function InquiriesList({
             <h3 style={{ margin: '8px 0 0' }}>{inq.name}</h3>
             <p className="contact-line">
               <a href={`mailto:${inq.email}`}>{inq.email}</a>
-              {inq.phone && <> · {inq.phone}</>}
-              {inq.business && <> · {inq.business}</>}
-            </p>
+              {inq.phone && (
+                <> 
+                  {' · '}
+                  <a href={`tel:${inq.phone.replace(/[^\d+]/g, '')}`}>{inq.phone}</a>
+                </>
+           )}
+           {inq.business && <> · {inq.business}</>}
+           </p>
             <p className="msg">{inq.message}</p>
           </div>
         ))}

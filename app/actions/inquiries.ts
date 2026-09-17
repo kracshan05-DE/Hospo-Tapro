@@ -9,6 +9,24 @@ import type { Brand } from '@/lib/types';
 
 export type InquiryResult = { ok: true } | { ok: false; error: string };
 
+// RFC 5322-derived, pragmatic pattern (the one HTML5's <input type="email">
+// uses under the hood): requires a proper local@domain.tld shape, no spaces,
+// valid domain label lengths. It confirms the string is SHAPED like an
+// email address — it cannot and should not try to confirm the address is
+// real or reachable; that would need sending a verification email, which is
+// a different feature, not form validation.
+const EMAIL_RE =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+// Loose on purpose — international phone formats vary widely (spaces,
+// dashes, parentheses, leading +). This only rejects things that plainly
+// aren't a phone number (letters, way too short/long), not a specific format.
+const PHONE_RE = /^[+()\d\s-]{7,20}$/;
+
+// At least one letter, so purely numeric or symbol-only garbage in the name
+// field is rejected — this is a format check, not a "this looks fake" check.
+const HAS_LETTER_RE = /[a-zA-Z]/;
+
 // Shared handler for both brands' public contact forms. Both forms post into
 // the same `inquiries` table (see supabase/schema.sql), distinguished by `brand`.
 async function submitInquiry(brand: Brand, formData: FormData): Promise<InquiryResult> {
@@ -47,11 +65,17 @@ async function submitInquiry(brand: Brand, formData: FormData): Promise<InquiryR
   if (!name || !email || !message) {
     return { ok: false, error: 'Please fill in your name, email and message.' };
   }
-  if (!email.includes('@') || email.length > 254) {
+  if (name.length < 2 || name.length > 200 || !HAS_LETTER_RE.test(name)) {
+    return { ok: false, error: 'Please enter your full name.' };
+  }
+  if (!EMAIL_RE.test(email) || email.length > 254) {
     return { ok: false, error: 'Please enter a valid email address.' };
   }
-  if (name.length > 200 || message.length > 5000) {
-    return { ok: false, error: 'That submission is too long. Please shorten it.' };
+  if (phone && !PHONE_RE.test(phone)) {
+    return { ok: false, error: 'Please enter a valid phone number.' };
+  }
+  if (message.length < 10 || message.length > 5000) {
+    return { ok: false, error: 'Please enter a message of at least 10 characters.' };
   }
 
   const supabase = createClient();
