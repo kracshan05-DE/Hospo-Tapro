@@ -29,7 +29,7 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://${supabaseHost ?? '*.supabase.co'}`,
+  `img-src 'self' data: blob: https://${supabaseHost ?? '*.supabase.co'} https://images.unsplash.com`,
   "font-src 'self'",
   `connect-src 'self' ${supabaseConnectSrc} https://challenges.cloudflare.com`,
   'frame-src https://challenges.cloudflare.com',

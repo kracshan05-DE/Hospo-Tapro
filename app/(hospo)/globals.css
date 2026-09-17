@@ -41,6 +41,10 @@ section{padding:90px 5%}
 .section-head{max-width:700px;margin-bottom:42px}
 .section-head h2{font-size:42px;line-height:1.1;margin:10px 0;color:#123d61}
 .section-head p{color:var(--muted);font-size:17px}
+.dark{background:var(--green2);color:#fff}
+.dark .section-head p{color:#c8d2cb}
+.dark .eyebrow{color:#fff}
+.dark .section-head h2{color:#8fd6a1}
 .trust{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .trust div{padding:22px;border:1px solid var(--line);border-radius:10px}
 .trust b{display:block;margin-bottom:5px}
