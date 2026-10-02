@@ -25,26 +25,24 @@ export default function ProductGrid({ products }: { products: Product[] }) {
         {products.length === 0 && <div className="empty-collection">More products are on the way.</div>}
         {products.map((p, i) => (
           <Reveal as="div" delay={i % 3} key={p.id} className="card">
-            <div className="card-inner">
-              <div className="num">{String(i + 1).padStart(2, '0')}</div>
-              <div className="card-art">
-                {p.image_url ? (
-                  <Image
-                    src={p.image_url}
-                    alt={p.name}
-                    fill
-                    sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
-                    style={{ objectFit: 'cover', objectPosition: 'center 30%' }}
-                  />
-                ) : (
-                  <span className="placeholder">Tapro</span>
-                )}
-              </div>
-              <div className="card-face">
-                {p.volume && <div className="vol">{p.volume}</div>}
-                <h3>{p.name}</h3>
-                <p>{p.description}</p>
-              </div>
+            <div className="num">{String(i + 1).padStart(2, '0')}</div>
+            <div className="card-art">
+              {p.image_url ? (
+                <Image
+                  src={p.image_url}
+                  alt={`${p.name}${p.volume ? ` – ${p.volume}` : ''}`}
+                  fill
+                  sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
+                  style={{ objectFit: 'cover', objectPosition: 'center' }}
+                />
+              ) : (
+                <span className="placeholder">Tapro</span>
+              )}
+            </div>
+            <div className="card-caption">
+              {p.volume && <div className="vol">{p.volume}</div>}
+              <h3>{p.name}</h3>
+              <p>{p.description}</p>
             </div>
           </Reveal>
         ))}
