@@ -275,23 +275,24 @@ section { position: relative; padding: clamp(48px, 6vw, 88px) 0; }
    always shown full and uncropped at its natural height, with no blur
    layer and no mismatched letterbox gap against the quote panel. */
 #heritage { background: var(--cream); padding: 0; }
-.split { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
 @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+
 .split-copy {
   background: var(--red); color: var(--cream); display: flex; flex-direction: column; justify-content: center;
   padding: min(6vw,64px) 6vw; position: relative; overflow: hidden;
 }
-.split-copy::before {
-  content: '\201C'; position: absolute; top: -4%; left: 2%; font-family: var(--serif);
-  font-size: 26rem; color: rgba(255,255,255,.05); line-height: 1; pointer-events: none;
-}
-.split-copy blockquote { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: clamp(1.3rem,2.4vw,1.9rem); line-height: 1.4; position: relative; z-index: 1; }
-.split-copy .heritage-eyebrow { color: var(--gold-light); }
-.split-copy cite { display: block; margin-top: 28px; font-style: normal; font-size: .72rem; letter-spacing: .28em; text-transform: uppercase; color: var(--gold-light); font-weight: 600; }
+
 .split-art {
   position: relative;
   overflow: hidden;
-  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream-soft);
 }
 .heritage-banner {
   display: block;
