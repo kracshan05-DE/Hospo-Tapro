@@ -16,13 +16,6 @@ export default function Heritage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/Tapro-banner.jpg"
-            alt=""
-            aria-hidden="true"
-            className="heritage-banner-blur"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/Tapro-banner.jpg"
             alt="Tapro by Hospo Fresh"
             className="heritage-banner"
           />

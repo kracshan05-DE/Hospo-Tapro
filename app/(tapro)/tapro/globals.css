@@ -46,15 +46,19 @@ body {
 }
 
 /* ---- header ---- */
+/* In normal document flow (not fixed): scrolls away with the page like any
+   other element, and can never overlap the hero image below it. */
 header.site-header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  position: relative;
+  z-index: 500;
   padding: 22px 6vw;
   display: flex; align-items: center; justify-content: space-between;
-  transition: background .5s ease, padding .4s ease, box-shadow .4s ease;
-}
-header.site-header.solid {
   background: rgba(32,29,26,.92);
   backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(187,133,49,.25);
+  transition: padding .4s ease, box-shadow .4s ease;
+}
+header.site-header.solid {
   padding: 14px 6vw;
   box-shadow: 0 8px 30px rgba(0,0,0,.25);
 }
@@ -121,10 +125,8 @@ body.nav-open .nav-scrim a { opacity: 1; transform: translateY(0); }
 body.nav-open { overflow: hidden; }
 
 /* ---- hero ---- */
-/* Single hero design for every screen size: full-width banner image shown
-   in full (no cropping), a soft dark fade at the top so the fixed header
-   stays legible over any part of the photo, and the headline in its own
-   solid band directly below the image — never overlapping it. */
+/* Full-width banner image shown in full (no cropping). Header is no longer
+   fixed/overlapping, so no legibility gradient is needed over the image. */
 #hero {
   position: relative;
   padding: 0;
@@ -135,15 +137,6 @@ body.nav-open { overflow: hidden; }
   position: relative;
   width: 100%;
   line-height: 0;
-}
-.hero-media::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 130px;
-  background: linear-gradient(180deg, rgba(0,0,0,.68), transparent);
-  pointer-events: none;
-  z-index: 1;
 }
 .hero-bg {
   display: block;
@@ -256,6 +249,12 @@ section { position: relative; padding: min(14vw,150px) 0; }
 .empty-collection { grid-column: 1 / -1; padding: 60px 6vw; text-align: center; color: #bdb2a4; font-family: var(--serif); font-style: italic; font-size: 1.3rem; }
 
 /* ---- heritage ---- */
+/* No-blur version: the full banner image is always shown uncropped
+   (object-fit: contain). Any leftover space shows this panel's own
+   background color instead of a blurred duplicate of the photo.
+   TUNE ME: pick the letterbox color your client prefers — var(--ink) for
+   a dark gap, var(--red) to match the .split-copy panel, or var(--cream)
+   for a light gap. */
 #heritage { background: var(--cream); padding: 0; }
 .split { display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh; }
 @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
@@ -273,17 +272,7 @@ section { position: relative; padding: min(14vw,150px) 0; }
 .split-art {
   position: relative;
   overflow: hidden;
-  background: var(--green);
-}
-.heritage-banner-blur {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  filter: blur(30px) brightness(.6) saturate(1.1);
-  transform: scale(1.15);
+  background: var(--ink); /* TUNE ME — see note above */
 }
 .heritage-banner {
   position: absolute;
@@ -341,12 +330,7 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
 @media (max-width: 640px) {
   .wrap { padding: 0 7vw; }
   header.site-header { padding: 18px 6vw; }
-  header.site-header.solid {
-    padding: 13px 6vw;
-    background: rgba(20,16,14,.92);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 24px rgba(0,0,0,.25);
-  }
+  header.site-header.solid { padding: 13px 6vw; }
   .logo-mark { font-size: 1.35rem; }
   .logo-mark span { font-size: .62rem; letter-spacing: .2em; }
   section { padding: 96px 0; }
@@ -358,7 +342,6 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
   .split-copy { padding: 60px 7vw; }
   .split-art { min-height: 280px; }
 
-  .hero-media::before { height: 90px; }
   .hero-content { padding: 32px 7vw 44px; }
   .hero-eyebrow { font-size: .62rem; letter-spacing: .3em; margin-bottom: 16px; }
   .hero-title { font-size: clamp(2.2rem, 9vw, 3.2rem); }
