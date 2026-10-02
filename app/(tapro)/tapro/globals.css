@@ -380,6 +380,7 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
     height: auto;
     min-height: 0;
     display: block;
+    padding: 0;
     background: var(--ink);
   }
   .hero-bg-blur { display: none; }
