@@ -36,7 +36,10 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                   style={{ objectFit: 'cover', objectPosition: 'center' }}
                 />
               ) : (
-                <span className="placeholder">Tapro</span>
+                <span className="placeholder">
+                  <span className="placeholder-mark">Tapro</span>
+                  <span className="placeholder-note">Photo coming soon</span>
+                </span>
               )}
             </div>
             <div className="card-caption">

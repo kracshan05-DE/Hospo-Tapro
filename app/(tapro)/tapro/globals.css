@@ -46,8 +46,8 @@ body {
 }
 
 /* ---- header ---- */
-/* In normal document flow (not fixed): scrolls away with the page like any
-   other element, and can never overlap the hero image below it. */
+/* Normal document flow (not fixed): scrolls away with the page and can
+   never overlap the hero image below it. */
 header.site-header {
   position: relative;
   z-index: 500;
@@ -125,8 +125,6 @@ body.nav-open .nav-scrim a { opacity: 1; transform: translateY(0); }
 body.nav-open { overflow: hidden; }
 
 /* ---- hero ---- */
-/* Full-width banner image shown in full (no cropping). Header is no longer
-   fixed/overlapping, so no legibility gradient is needed over the image. */
 #hero {
   position: relative;
   padding: 0;
@@ -171,8 +169,8 @@ body.nav-open { overflow: hidden; }
 @keyframes shimmer { to { background-position: -220% 0; } }
 
 /* ---- shared section ---- */
-section { position: relative; padding: min(14vw,150px) 0; }
-.section-head { max-width: 640px; margin-bottom: 70px; }
+section { position: relative; padding: clamp(48px, 6vw, 88px) 0; }
+.section-head { max-width: 640px; margin-bottom: 40px; }
 .section-head h2 {
   font-family: var(--serif); font-weight: 500; font-style: italic;
   font-size: clamp(2.3rem, 4.6vw, 3.6rem); line-height: 1.06; margin-top: 14px;
@@ -211,6 +209,7 @@ section { position: relative; padding: min(14vw,150px) 0; }
 #collection .eyebrow { color: var(--gold-light); }
 #collection .section-head h2 { color: var(--cream); }
 #collection .section-head p { color: #bdb2a4; margin-top: 18px; font-weight: 300; line-height: 1.8; }
+#collection:has(.empty-collection) { padding: 48px 0; }
 
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: rgba(187,133,49,.25); }
 @media (max-width: 900px) { .grid { grid-template-columns: repeat(2,1fr); } }
@@ -225,7 +224,30 @@ section { position: relative; padding: min(14vw,150px) 0; }
 .card-art img { width: 100%; height: 100%; object-fit: cover; object-position: center; position: relative; z-index: 1; display: block;
   filter: saturate(1.05) contrast(1.03); transition: transform .8s cubic-bezier(.16,.84,.32,1), filter .6s ease; }
 .card:hover .card-art img { transform: scale(1.06); filter: saturate(1.15) contrast(1.05); }
-.card-art .placeholder { color: var(--gold-light); opacity: .35; font-family: var(--serif); font-style: italic; font-size: 1.1rem; z-index: 1; }
+
+.card-art .placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+  text-align: center;
+}
+.placeholder-mark {
+  color: var(--gold-light);
+  opacity: .6;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.3rem;
+}
+.placeholder-note {
+  color: var(--gold-light);
+  opacity: .4;
+  font-family: var(--sans);
+  font-size: .62rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
 
 .card-caption {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
@@ -246,17 +268,14 @@ section { position: relative; padding: min(14vw,150px) 0; }
 
 .card::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; box-shadow: inset 0 0 0 0 rgba(187,133,49,0); transition: box-shadow .5s ease; }
 .card:hover::after { box-shadow: inset 0 0 0 1px rgba(187,133,49,.55); }
-.empty-collection { grid-column: 1 / -1; padding: 60px 6vw; text-align: center; color: #bdb2a4; font-family: var(--serif); font-style: italic; font-size: 1.3rem; }
+.empty-collection { grid-column: 1 / -1; padding: 24px 6vw; text-align: center; color: #bdb2a4; font-family: var(--serif); font-style: italic; font-size: 1.3rem; }
 
 /* ---- heritage ---- */
-/* No-blur version: the full banner image is always shown uncropped
-   (object-fit: contain). Any leftover space shows this panel's own
-   background color instead of a blurred duplicate of the photo.
-   TUNE ME: pick the letterbox color your client prefers — var(--ink) for
-   a dark gap, var(--red) to match the .split-copy panel, or var(--cream)
-   for a light gap. */
+/* Columns size to their own content (no forced stretch), so the image is
+   always shown full and uncropped at its natural height, with no blur
+   layer and no mismatched letterbox gap against the quote panel. */
 #heritage { background: var(--cream); padding: 0; }
-.split { display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh; }
+.split { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
 @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
 .split-copy {
   background: var(--red); color: var(--cream); display: flex; flex-direction: column; justify-content: center;
@@ -272,15 +291,11 @@ section { position: relative; padding: min(14vw,150px) 0; }
 .split-art {
   position: relative;
   overflow: hidden;
-  background: var(--ink); /* TUNE ME — see note above */
 }
 .heritage-banner {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
+  height: auto;
 }
 
 /* ---- values ---- */
@@ -329,22 +344,29 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
 
 @media (max-width: 640px) {
   .wrap { padding: 0 7vw; }
-  header.site-header { padding: 18px 6vw; }
-  header.site-header.solid { padding: 13px 6vw; }
-  .logo-mark { font-size: 1.35rem; }
-  .logo-mark span { font-size: .62rem; letter-spacing: .2em; }
-  section { padding: 96px 0; }
-  .section-head { margin-bottom: 44px; }
+  header.site-header { padding: 12px 5vw; }
+  header.site-header.solid { padding: 10px 5vw; }
+  .logo-mark { font-size: 1.1rem; }
+  .logo-mark span { font-size: .55rem; letter-spacing: .18em; }
+  .nav-toggle { width: 36px; height: 36px; }
+  .nav-toggle span { left: 8px; right: 8px; }
+  .nav-toggle span:nth-child(1) { top: 13px; }
+  .nav-toggle span:nth-child(2) { top: 17px; }
+  .nav-toggle span:nth-child(3) { top: 21px; }
+  body.nav-open .nav-toggle span:nth-child(1) { top: 17px; }
+  body.nav-open .nav-toggle span:nth-child(3) { top: 17px; }
+
+  section { padding: 56px 0; }
+  .section-head { margin-bottom: 32px; }
   .manifesto-marks { gap: 34px; margin-top: 44px; }
   .mark strong { font-size: 2rem; }
   .marquee-band { padding: 16px 0; }
   .marquee-track { gap: 2rem; animation-duration: 20s; }
   .split-copy { padding: 60px 7vw; }
-  .split-art { min-height: 280px; }
 
-  .hero-content { padding: 32px 7vw 44px; }
-  .hero-eyebrow { font-size: .62rem; letter-spacing: .3em; margin-bottom: 16px; }
-  .hero-title { font-size: clamp(2.2rem, 9vw, 3.2rem); }
+  .hero-content { padding: 18px 7vw 24px; }
+  .hero-eyebrow { font-size: .6rem; letter-spacing: .26em; margin-bottom: 10px; }
+  .hero-title { font-size: clamp(1.9rem, 8vw, 2.8rem); }
 
   #contact p { font-size: .86rem; margin-bottom: 26px; }
   .magnet-btn { padding: 17px 32px; font-size: .7rem; letter-spacing: .22em; }
