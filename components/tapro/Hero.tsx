@@ -6,20 +6,20 @@ export default function Hero() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setOpen(true), 350);
+    const t = setTimeout(() => setOpen(true), 150);
     return () => clearTimeout(t);
   }, []);
 
   return (
     <section id="hero" className={open ? 'open' : ''}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/Tapro-Header.jpg" alt="" className="hero-bg-blur" aria-hidden="true" />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/Tapro-Header.jpg" alt="" className="hero-bg" />
-      <div className="curtain-tex"></div>
-      <div className="curtain-vignette"></div>
-      <div className="panel left"></div>
-      <div className="panel right"></div>
+      <div className="hero-media">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/Tapro-Header.jpg"
+          alt="Tapro by Hospo Fresh — Authentic Sri Lankan Spice & Rice"
+          className="hero-bg"
+        />
+      </div>
       <div className="hero-content">
         <div className="hero-eyebrow">Product of Sri Lanka</div>
         <h1 className="hero-title">
@@ -27,10 +27,6 @@ export default function Hero() {
           <br />
           of <em>Excellence</em>
         </h1>
-      </div>
-      <div className="scroll-cue">
-        <div className="line"></div>
-        <span>Scroll</span>
       </div>
     </section>
   );

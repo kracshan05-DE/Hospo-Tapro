@@ -121,67 +121,52 @@ body.nav-open .nav-scrim a { opacity: 1; transform: translateY(0); }
 body.nav-open { overflow: hidden; }
 
 /* ---- hero ---- */
+/* Single hero design for every screen size: full-width banner image shown
+   in full (no cropping), a soft dark fade at the top so the fixed header
+   stays legible over any part of the photo, and the headline in its own
+   solid band directly below the image — never overlapping it. */
 #hero {
-  position: relative; height: 100svh; min-height: 640px;
-  background: linear-gradient(180deg, var(--red-shadow), var(--red-deep) 60%, var(--red-shadow));
-  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  position: relative;
+  padding: 0;
+  background: var(--ink);
+  overflow: hidden;
 }
-.hero-bg-blur {
-  position: absolute;
-  inset: 0;
+.hero-media {
+  position: relative;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  filter: blur(36px) brightness(.55) saturate(1.1);
-  transform: scale(1.15);
+  line-height: 0;
+}
+.hero-media::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 130px;
+  background: linear-gradient(180deg, rgba(0,0,0,.68), transparent);
+  pointer-events: none;
+  z-index: 1;
 }
 .hero-bg {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
+  height: auto;
 }
-.curtain-tex {
-  position: absolute; inset: 0;
-  background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0px, rgba(0,0,0,.18) 2px, rgba(255,255,255,.035) 2px, rgba(255,255,255,.035) 5px, transparent 5px, transparent 24px);
-  mix-blend-mode: multiply;
-}
-.curtain-vignette {
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center 40%, transparent 30%, rgba(0,0,0,.55) 100%);
-}
-.panel {
-  position: absolute; top: -4%; bottom: -4%; width: 56%;
-  background:
-    radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,.10), transparent 55%),
-    repeating-linear-gradient(90deg, rgba(0,0,0,.25) 0 3%, rgba(255,255,255,.05) 3% 6%),
-    linear-gradient(180deg, #6d1417, #4a0f12 55%, #360b0d);
-  box-shadow: inset 0 0 120px rgba(0,0,0,.6), 0 0 60px rgba(0,0,0,.6);
-  transition: transform 2.1s cubic-bezier(.76,0,.24,1);
-  z-index: 5;
-}
-.panel.left { left: -2%; border-radius: 0 0 55% 8% / 0 0 30% 4%; }
-.panel.right { right: -2%; border-radius: 0 0 8% 55% / 0 0 4% 30%; }
-#hero.open .panel.left { transform: translateX(-102%); }
-#hero.open .panel.right { transform: translateX(102%); }
-
 .hero-content {
-  position: relative; z-index: 2; text-align: center; color: var(--cream);
-  width: 100%; max-width: 900px; padding: 0 5vw; box-sizing: border-box;
-  opacity: 0; transform: translateY(20px);
-  transition: opacity 1.4s ease .9s, transform 1.4s cubic-bezier(.16,.84,.32,1) .9s;
+  position: relative;
+  text-align: center;
+  color: var(--cream);
+  padding: 56px 6vw 76px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 1s ease .15s, transform 1s cubic-bezier(.16,.84,.32,1) .15s;
 }
 #hero.open .hero-content { opacity: 1; transform: translateY(0); }
 .hero-eyebrow {
   font-size: .72rem; letter-spacing: .4em; text-transform: uppercase;
-  color: var(--gold-light); font-weight: 600; margin-bottom: 22px;
+  color: var(--gold-light); font-weight: 600; margin-bottom: 20px;
 }
 .hero-title {
   font-family: var(--serif); font-weight: 500;
-  font-size: clamp(3rem, 8vw, 7.2rem); line-height: .98; color: var(--cream);
+  font-size: clamp(2.2rem, 5vw, 4.6rem); line-height: 1.08; color: var(--cream);
 }
 .hero-title em {
   font-style: italic; color: var(--gold-light);
@@ -191,19 +176,6 @@ body.nav-open { overflow: hidden; }
   animation: shimmer 7s linear infinite;
 }
 @keyframes shimmer { to { background-position: -220% 0; } }
-.scroll-cue {
-  position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  color: var(--cream-soft); z-index: 3; opacity: 0; transition: opacity 1s ease 2s;
-}
-#hero.open .scroll-cue { opacity: .85; }
-.scroll-cue .line { width: 1px; height: 46px; background: linear-gradient(var(--gold), transparent); position: relative; overflow: hidden; }
-.scroll-cue .line::after {
-  content: ''; position: absolute; top: -46px; left: 0; width: 100%; height: 46px;
-  background: linear-gradient(var(--cream), transparent); animation: drip 2.6s ease-in-out infinite;
-}
-@keyframes drip { to { top: 100%; } }
-.scroll-cue span { font-size: .62rem; letter-spacing: .3em; text-transform: uppercase; }
 
 /* ---- shared section ---- */
 section { position: relative; padding: min(14vw,150px) 0; }
@@ -309,7 +281,7 @@ section { position: relative; padding: min(14vw,150px) 0; }
 .heritage-banner {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
 }
 
@@ -372,34 +344,10 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
   .split-copy { padding: 60px 7vw; }
   .split-art { min-height: 280px; }
 
-  /* Mobile hero: compact banner instead of full-screen cinematic hero.
-     The image shows in full (no cropping, no letterbox bars) at its natural
-     proportions, followed by a solid dark band with the headline below it.
-     No overlap, no empty space, no guessing crop positions. */
-  #hero {
-    height: auto;
-    min-height: 0;
-    display: block;
-    padding: 0;
-    background: var(--ink);
-  }
-  .hero-bg-blur { display: none; }
-  .hero-bg {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: contain;
-  }
-  .curtain-tex, .curtain-vignette, .panel, .scroll-cue { display: none; }
-  .hero-content {
-    position: relative;
-    background: var(--ink);
-    padding: 36px 7vw 48px;
-  }
+  .hero-media::before { height: 90px; }
+  .hero-content { padding: 32px 7vw 44px; }
   .hero-eyebrow { font-size: .62rem; letter-spacing: .3em; margin-bottom: 16px; }
-  .hero-title { font-size: clamp(2.6rem, 11vw, 4rem); }
+  .hero-title { font-size: clamp(2.2rem, 9vw, 3.2rem); }
 
   #contact p { font-size: .86rem; margin-bottom: 26px; }
   .magnet-btn { padding: 17px 32px; font-size: .7rem; letter-spacing: .22em; }
