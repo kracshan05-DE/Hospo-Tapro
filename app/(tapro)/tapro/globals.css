@@ -369,7 +369,15 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
   .marquee-track { gap: 2rem; animation-duration: 20s; }
   .split-copy { padding: 60px 7vw; }
   .split-art { min-height: 280px; }
-  .heritage-banner { max-width: 320px; }
+
+  .hero-bg {
+    object-fit: cover;
+    object-position: 70% center;
+  }
+  .curtain-vignette {
+    background: radial-gradient(ellipse at center 40%, rgba(0,0,0,.25) 20%, rgba(0,0,0,.8) 100%);
+  }
+
   #contact p { font-size: .86rem; margin-bottom: 26px; }
   .magnet-btn { padding: 17px 32px; font-size: .7rem; letter-spacing: .22em; }
 }
