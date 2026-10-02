@@ -126,6 +126,15 @@ body.nav-open { overflow: hidden; }
   background: linear-gradient(180deg, var(--red-shadow), var(--red-deep) 60%, var(--red-shadow));
   overflow: hidden; display: flex; align-items: center; justify-content: center;
 }
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
 .curtain-tex {
   position: absolute; inset: 0;
   background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0px, rgba(0,0,0,.18) 2px, rgba(255,255,255,.035) 2px, rgba(255,255,255,.035) 5px, transparent 5px, transparent 24px);
@@ -285,18 +294,17 @@ section { position: relative; padding: min(14vw,150px) 0; }
 .split-copy .heritage-eyebrow { color: var(--gold-light); }
 .split-copy cite { display: block; margin-top: 28px; font-style: normal; font-size: .72rem; letter-spacing: .28em; text-transform: uppercase; color: var(--gold-light); font-weight: 600; }
 .split-art {
-  background: radial-gradient(circle at 30% 30%, rgba(187,133,49,.35), transparent 55%), repeating-radial-gradient(circle at 70% 70%, rgba(42,60,39,.5) 0 2px, transparent 2px 40px), var(--green);
-  position: relative; display: flex; align-items: center; justify-content: center;
-  padding: 40px;
+  background: var(--green);
+  position: relative;
+  overflow: hidden;
 }
 .heritage-banner {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: 480px;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.35);
-  position: relative;
-  z-index: 1;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 /* ---- values ---- */
@@ -359,7 +367,7 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
   .marquee-band { padding: 16px 0; }
   .marquee-track { gap: 2rem; animation-duration: 20s; }
   .split-copy { padding: 60px 7vw; }
-  .split-art { min-height: 280px; padding: 40px 24px; }
+  .split-art { min-height: 280px; }
   .heritage-banner { max-width: 320px; }
   #contact p { font-size: .86rem; margin-bottom: 26px; }
   .magnet-btn { padding: 17px 32px; font-size: .7rem; letter-spacing: .22em; }

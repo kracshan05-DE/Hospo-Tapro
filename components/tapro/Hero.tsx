@@ -12,6 +12,8 @@ export default function Hero() {
 
   return (
     <section id="hero" className={open ? 'open' : ''}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/Tapro-Header.jpg" alt="" className="hero-bg" />
       <div className="curtain-tex"></div>
       <div className="curtain-vignette"></div>
       <div className="panel left"></div>
