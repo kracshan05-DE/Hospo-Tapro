@@ -131,7 +131,7 @@ body.nav-open { overflow: hidden; }
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   z-index: 0;
 }
@@ -297,13 +297,14 @@ section { position: relative; padding: min(14vw,150px) 0; }
   background: var(--green);
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .heritage-banner {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
 }
 
