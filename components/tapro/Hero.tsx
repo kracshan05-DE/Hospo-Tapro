@@ -25,10 +25,6 @@ export default function Hero() {
           <br />
           of <em>Excellence</em>
         </h1>
-        <p className="hero-sub">
-          Premium Sri Lankan sauces, sambols, spices and coconut oil — crafted from island
-          heritage, refined for the modern gourmet table.
-        </p>
       </div>
       <div className="scroll-cue">
         <div className="line"></div>
