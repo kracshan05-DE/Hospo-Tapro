@@ -15,7 +15,7 @@ export default function Hero() {
       <div className="hero-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/Tapro-Header.jpg"
+          src="/Tapro-Header.jpeg"
           alt="Tapro by Hospo Fresh — Authentic Sri Lankan Spice & Rice"
           className="hero-bg"
         />
