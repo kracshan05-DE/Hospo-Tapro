@@ -191,10 +191,6 @@ body.nav-open { overflow: hidden; }
   animation: shimmer 7s linear infinite;
 }
 @keyframes shimmer { to { background-position: -220% 0; } }
-.hero-sub {
-  font-family: var(--sans); font-size: .95rem; letter-spacing: .04em;
-  color: var(--cream-soft); max-width: 520px; margin: 26px auto 0; line-height: 1.8; font-weight: 300;
-}
 .scroll-cue {
   position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
   display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -367,9 +363,6 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
   header.site-header.solid { padding: 13px 6vw; }
   .logo-mark { font-size: 1.35rem; }
   .logo-mark span { font-size: .62rem; letter-spacing: .2em; }
-  .hero-eyebrow { font-size: .62rem; letter-spacing: .3em; margin-bottom: 16px; }
-  .hero-title { font-size: clamp(2.6rem, 11vw, 4rem); }
-  .hero-sub { font-size: .86rem; margin-top: 18px; }
   section { padding: 96px 0; }
   .section-head { margin-bottom: 44px; }
   .manifesto-marks { gap: 34px; margin-top: 44px; }
@@ -378,6 +371,35 @@ footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color
   .marquee-track { gap: 2rem; animation-duration: 20s; }
   .split-copy { padding: 60px 7vw; }
   .split-art { min-height: 280px; }
+
+  /* Mobile hero: compact banner instead of full-screen cinematic hero.
+     The image shows in full (no cropping, no letterbox bars) at its natural
+     proportions, followed by a solid dark band with the headline below it.
+     No overlap, no empty space, no guessing crop positions. */
+  #hero {
+    height: auto;
+    min-height: 0;
+    display: block;
+    background: var(--ink);
+  }
+  .hero-bg-blur { display: none; }
+  .hero-bg {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+  .curtain-tex, .curtain-vignette, .panel, .scroll-cue { display: none; }
+  .hero-content {
+    position: relative;
+    background: var(--ink);
+    padding: 36px 7vw 48px;
+  }
+  .hero-eyebrow { font-size: .62rem; letter-spacing: .3em; margin-bottom: 16px; }
+  .hero-title { font-size: clamp(2.6rem, 11vw, 4rem); }
+
   #contact p { font-size: .86rem; margin-bottom: 26px; }
   .magnet-btn { padding: 17px 32px; font-size: .7rem; letter-spacing: .22em; }
 }
