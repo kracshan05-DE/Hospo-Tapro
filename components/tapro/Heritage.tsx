@@ -15,9 +15,12 @@ export default function Heritage() {
         <Reveal as="div" delay={1} className="split-art">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/Tapro-banner.jpg"
+            src="/tapro-banner.webp"
             alt="Tapro by Hospo Fresh"
             className="heritage-banner"
+            width={1024}
+            height={434}
+            loading="lazy"
           />
         </Reveal>
       </div>

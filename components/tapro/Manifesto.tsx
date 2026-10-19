@@ -19,10 +19,14 @@ export default function Manifesto({ productCount }: { productCount: number }) {
         </Reveal>
 
         <Reveal delay={3} className="manifesto-marks">
-          <div className="mark">
-            <strong>{productCount}+</strong>
-            <span>Signature Products</span>
-          </div>
+          {/* Shown only once products exist, so an empty catalogue never
+              reads as "0+ Signature Products". */}
+          {productCount > 0 && (
+            <div className="mark">
+              <strong>{productCount}</strong>
+              <span>Signature Products</span>
+            </div>
+          )}
           <div className="mark">
             <strong>100%</strong>
             <span>Sri Lankan Sourced</span>

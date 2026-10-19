@@ -1,0 +1,40 @@
+<!doctype html>
+<!--
+  Tapro product admin (Decap CMS).
+
+  Sign-in is with GitHub, through Netlify's GitHub OAuth provider. Only
+  GitHub accounts with write access to the repository can sign in and save,
+  so the admin list is managed in GitHub: Repository → Settings →
+  Collaborators. Saving commits to the repository, and Netlify rebuilds the
+  site automatically (live in about 1–2 minutes).
+
+  Configuration: ./config.yml. Setup steps: README.md.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <!--
+      Admin-only Content-Security-Policy, separate from the public site's.
+      Decap needs: its pinned bundle and chunks from unpkg; 'unsafe-eval'
+      (its config validator compiles schemas at runtime); the GitHub API for
+      reading and committing content; GitHub avatar and blob images; and
+      localhost:8081, used only by `npm run cms` during local development.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://avatars.githubusercontent.com https://raw.githubusercontent.com https://images.unsplash.com; font-src 'self' data:; connect-src 'self' https://api.github.com https://unpkg.com http://localhost:8081; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <title>Tapro Products · Admin</title>
+  </head>
+  <body>
+    <!-- Version pinned and integrity-checked: the browser refuses the file if
+         it differs in any way from the reviewed decap-cms@3.16.3 release. -->
+    <script
+      src="https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js"
+      integrity="sha384-A/Gdn928CNLufmnGWGs9RM4Q9o8bSNLeJERqBFrBjwzL7FRpoLT3MPF8Tl0+Wd2p"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

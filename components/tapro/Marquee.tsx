@@ -10,8 +10,12 @@ export default function Marquee() {
   return (
     <div className="marquee-band">
       <div className="marquee-track">
+        {/* The list is rendered twice for a seamless loop; the copy is hidden
+            from screen readers so each phrase is announced once. */}
         {items.map((text, i) => (
-          <span key={i}>{text}</span>
+          <span key={i} aria-hidden={i >= ITEMS.length ? true : undefined}>
+            {text}
+          </span>
         ))}
       </div>
     </div>

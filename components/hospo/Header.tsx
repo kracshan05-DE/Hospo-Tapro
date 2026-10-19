@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const LINKS = [
   { href: '#products', label: 'Products' },
@@ -10,81 +10,76 @@ const LINKS = [
   { href: '#contact', label: 'Contact' },
 ];
 
-export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
+// `homePath` is "" on the home page (so links are plain "#section" anchors)
+// and "/" on other pages such as /privacy (so they lead back home).
+export default function Header({ homePath = '' }: { homePath?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const fixedRef = useRef<HTMLDivElement>(null);
-  const [spacerHeight, setSpacerHeight] = useState(0);
 
-  const authLink = isAdmin
-    ? { href: '/admin/dashboard/hospo-fresh', label: 'Dashboard' }
-    : { href: '/admin/login', label: 'Sign In' };
-
+  // Escape closes the mobile menu, as users of keyboards and switch devices expect.
   useEffect(() => {
-    function measure() {
-      if (fixedRef.current) setSpacerHeight(fixedRef.current.offsetHeight);
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [menuOpen]);
 
   return (
-    <>
-      <div className="site-fixed-top" ref={fixedRef}>
-        <div className="top">
-          <span>Foodservice supplier • importer • distributor • manufacturer</span>
-          <span>Wholesale enquiries: 0493 449 072</span>
-        </div>
+    // Sticky (not fixed): it stays in normal flow, so nothing needs measuring
+    // in JavaScript and the page never jumps when it loads. Anchor targets
+    // are offset below it via scroll-padding-top in globals.css.
+    <div className="site-top">
+      <div className="top">
+        <span>Foodservice supplier • importer • distributor • manufacturer</span>
+        <span>
+          Wholesale enquiries: <a href="tel:+61493449072">0493 449 072</a>
+        </span>
+      </div>
 
-        <header>
-          <a href="#">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="logo" src="/hospo-fresh-logo.png" alt="Hospo Fresh" />
-          </a>
-          {/* No "desktop-only" here on purpose — this stays visible next to
-              the logo at every screen size, so it never gets buried inside
-              the hamburger menu on mobile. */}
-          <a href="/tapro" className="tapro-mark">
-            Tapro
-          </a>
-          <nav className="nav">
-            {LINKS.map((l) => (
-              <a key={l.href} href={l.href}>
-                {l.label}
-              </a>
-            ))}
-            <a href={authLink.href} className="auth-link">
-              {authLink.label}
-            </a>
-          </nav>
-          <a className="header-btn desktop-only" href="#contact">
-            Wholesale Enquiry
-          </a>
-          <button className="menu-toggle" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </header>
-
-        {/* Tapro is deliberately NOT repeated in here — it's already
-            permanently visible next to the logo above, on every screen size. */}
-        <div className={`mobile-nav${menuOpen ? ' open' : ''}`}>
+      <header>
+        <a href={homePath || '#'} className="logo-link">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static export serves images as-is */}
+          <img className="logo" src="/hospo-fresh-logo.png" alt="Hospo Fresh home" width={44} height={44} />
+        </a>
+        {/* Visible next to the logo at every screen size, so the sister brand
+            is never buried inside the mobile menu. */}
+        <a href="/tapro" className="tapro-mark">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static export serves images as-is */}
+          <img src="/tapro-logo.png" alt="Tapro by Hospo Fresh" width={120} height={49} />
+        </a>
+        <nav className="nav" aria-label="Main">
           {LINKS.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)}>
+            <a key={l.href} href={`${homePath}${l.href}`}>
               {l.label}
             </a>
           ))}
-          <a href={authLink.href} className="auth-link" onClick={() => setMenuOpen(false)}>
-            {authLink.label}
-          </a>
-          <a className="header-btn" href="#contact" onClick={() => setMenuOpen(false)}>
-            Wholesale Enquiry
-          </a>
-        </div>
-      </div>
+        </nav>
+        <a className="header-btn desktop-only" href={`${homePath}#contact`}>
+          Wholesale Enquiry
+        </a>
+        <button
+          type="button"
+          className="menu-toggle"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav"
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </header>
 
-      <div style={{ height: spacerHeight }} />
-    </>
+      <nav id="mobile-nav" className={`mobile-nav${menuOpen ? ' open' : ''}`} aria-label="Main (mobile)">
+        {LINKS.map((l) => (
+          <a key={l.href} href={`${homePath}${l.href}`} onClick={() => setMenuOpen(false)}>
+            {l.label}
+          </a>
+        ))}
+        <a className="header-btn" href={`${homePath}#contact`} onClick={() => setMenuOpen(false)}>
+          Wholesale Enquiry
+        </a>
+      </nav>
+    </div>
   );
 }

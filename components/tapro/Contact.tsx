@@ -1,20 +1,23 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef } from 'react';
 import Reveal from './Reveal';
-import { submitTaproInquiry } from '@/app/actions/inquiries';
-import TurnstileWidget from '@/components/shared/TurnstileWidget';
+import { useEnquiryForm } from '@/lib/enquiry';
+
+const FORM = 'tapro-enquiry';
 
 export default function Contact() {
-  const [status, setStatus] = useState<'idle' | 'sent' | 'error'>('idle');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [isPending, startTransition] = useTransition();
+  const { status, errors, onSubmit, fieldProps } = useEnquiryForm(FORM);
   const btnRef = useRef<HTMLButtonElement>(null);
-  const renderedAt = useRef(Date.now());
+  const thanksRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (status === 'sent') thanksRef.current?.focus();
+  }, [status]);
 
   function handleMagnet(e: React.MouseEvent<HTMLButtonElement>) {
     const btn = btnRef.current;
-    if (!btn) return;
+    if (!btn || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = btn.getBoundingClientRect();
     const x = (e.clientX - r.left - r.width / 2) * 0.35;
     const y = (e.clientY - r.top - r.height / 2) * 0.35;
@@ -24,27 +27,20 @@ export default function Contact() {
     if (btnRef.current) btnRef.current.style.transform = 'translate(0,0)';
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    startTransition(async () => {
-      const result = await submitTaproInquiry(formData);
-      if (result.ok) {
-        setStatus('sent');
-      } else {
-        setStatus('error');
-        setErrorMsg(result.error);
-      }
-    });
-  }
+  const err = (name: keyof typeof errors) =>
+    errors[name] ? (
+      <span className="field-error" id={`${FORM}-${name}-error`}>
+        {errors[name]}
+      </span>
+    ) : null;
 
   return (
-    <section id="contact">
+    <section id="contact" aria-labelledby="contact-title">
       <div className="inner wrap">
         <Reveal delay={0} className="eyebrow">
           Get in Touch
         </Reveal>
-        <Reveal as="h2" delay={1}>
+        <Reveal as="h2" delay={1} id="contact-title">
           Bring Sri Lanka
           <br />
           to your table.
@@ -55,45 +51,54 @@ export default function Contact() {
         </Reveal>
 
         {status === 'sent' ? (
-          <Reveal as="p" delay={3} className="form-status">
+          <p className="form-status" role="status" tabIndex={-1} ref={thanksRef}>
             Thank you — your enquiry has been sent. We&apos;ll be in touch soon.
-          </Reveal>
+          </p>
         ) : (
-          <Reveal as="form" delay={3} className="contact-form" onSubmit={handleSubmit}>
-            {/* Honeypot field: real visitors never see or fill this in */}
-            <input type="text" name="bot-field" tabIndex={-1} autoComplete="off" style={{ display: 'none' }} />
-            <input type="hidden" name="form_rendered_at" value={renderedAt.current} />
-            <div>
-              <label htmlFor="name">Name</label>
-              <input id="name" name="name" type="text" required maxLength={200} />
+          <Reveal as="form" delay={3} className="contact-form" onSubmit={onSubmit} noValidate aria-label="Tapro enquiry">
+            {/* Honeypot: hidden from people and assistive tech. */}
+            <div className="hp" aria-hidden="true">
+              <label>
+                Leave this empty
+                <input type="text" name="bot-field" tabIndex={-1} autoComplete="off" />
+              </label>
             </div>
             <div>
-              <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" required maxLength={254} />
+              <label htmlFor="tf-name">Name</label>
+              <input id="tf-name" name="name" type="text" autoComplete="name" required maxLength={200} {...fieldProps('name')} />
+              {err('name')}
             </div>
             <div>
-              <label htmlFor="message">Message</label>
-              <textarea id="message" name="message" required maxLength={5000} />
+              <label htmlFor="tf-email">Email</label>
+              <input id="tf-email" name="email" type="email" autoComplete="email" required maxLength={254} {...fieldProps('email')} />
+              {err('email')}
             </div>
-            <TurnstileWidget />
-            <p style={{ fontSize: 12, color: '#bdb2a4', margin: 0 }}>
-              By submitting, you agree to our{' '}
-              <a href="/privacy" style={{ textDecoration: 'underline', color: 'var(--gold-light)' }}>
-                Privacy Policy
-              </a>
-              .
+            <div>
+              <label htmlFor="tf-message">Message</label>
+              <textarea id="tf-message" name="message" required maxLength={5000} {...fieldProps('message')} />
+              {err('message')}
+            </div>
+            <p className="form-note">
+              By submitting, you agree to our <a href="/privacy">Privacy Policy</a>.
             </p>
             <button
               type="submit"
               className="magnet-btn"
-              disabled={isPending}
+              disabled={status === 'sending'}
               ref={btnRef}
               onMouseMove={handleMagnet}
               onMouseLeave={resetMagnet}
             >
-              {isPending ? 'Sending…' : 'Send Enquiry →'}
+              {status === 'sending' ? 'Sending…' : 'Send Enquiry →'}
             </button>
-            {status === 'error' && <p className="error-text">{errorMsg}</p>}
+            <p className="error-text" role="alert">
+              {status === 'error' && (
+                <>
+                  Sorry, your enquiry could not be sent. Please try again, or email{' '}
+                  <a href="mailto:info@hospofresh.com.au">info@hospofresh.com.au</a>.
+                </>
+              )}
+            </p>
           </Reveal>
         )}
       </div>

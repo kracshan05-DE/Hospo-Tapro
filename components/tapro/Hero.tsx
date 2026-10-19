@@ -15,9 +15,11 @@ export default function Hero() {
       <div className="hero-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/Tapro-Header.jpeg"
+          src="/tapro-hero.webp"
           alt="Tapro by Hospo Fresh — Authentic Sri Lankan Spice & Rice"
           className="hero-bg"
+          width={1584}
+          height={672}
         />
       </div>
       <div className="hero-content">

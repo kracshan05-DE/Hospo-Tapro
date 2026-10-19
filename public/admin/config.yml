@@ -1,0 +1,74 @@
+# Decap CMS configuration for the Tapro product list.
+# Docs: https://decapcms.org/docs/configuration-options/
+
+backend:
+  name: github
+  repo: kracshan05-DE/hospo-tapro
+  branch: main
+  commit_messages:
+    create: 'Create {{collection}} “{{slug}}” via CMS'
+    update: 'Update {{collection}} “{{slug}}” via CMS'
+    delete: 'Delete {{collection}} “{{slug}}” via CMS'
+    uploadMedia: 'Upload “{{path}}” via CMS'
+    deleteMedia: 'Delete “{{path}}” via CMS'
+
+# Saves go straight to the main branch, which Netlify deploys.
+publish_mode: simple
+
+# Local development only: `npm run cms` in one terminal and `npm run dev` in
+# another, then open http://localhost:3000/admin/index.html. Edits are written
+# to your local files instead of GitHub. Ignored on the live site.
+local_backend: true
+
+# Product photos are committed to public/products/ and served from /products/.
+media_folder: public/products
+public_folder: /products
+
+collections:
+  - name: tapro
+    label: Tapro
+    editor:
+      preview: false
+    files:
+      - name: products
+        label: Products
+        file: content/products.json
+        format: json
+        description: >-
+          Drag products to change their order on the site. Press Publish to
+          save; the live site updates in about 1–2 minutes.
+        fields:
+          - label: Products
+            name: products
+            widget: list
+            label_singular: product
+            summary: '{{fields.name}} {{fields.volume}}'
+            collapsed: true
+            fields:
+              - label: Product name
+                name: name
+                widget: string
+                pattern: ['^.{1,200}$', 'Required, 200 characters or fewer.']
+              - label: Size / volume
+                name: volume
+                widget: string
+                required: false
+                hint: e.g. 250ml Bottle
+                pattern: ['^.{0,80}$', '80 characters or fewer.']
+              - label: Description
+                name: description
+                widget: text
+                required: false
+                hint: A short line about the product.
+                pattern: ['^[\s\S]{0,2000}$', '2,000 characters or fewer.']
+              - label: Photo
+                name: image
+                widget: image
+                required: false
+                choose_url: false
+                hint: JPEG, PNG or WebP, under 1 MB. Portrait (4:5) crops best.
+                # The site serves photos exactly as uploaded (no resizing), so
+                # large files slow the page down. Export at about 1200 px wide.
+                media_library:
+                  config:
+                    max_file_size: 1048576 # 1 MB

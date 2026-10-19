@@ -1,144 +1,176 @@
-# Hospo Fresh Group — Unified App
+# Hospo Fresh Group website
 
-One Next.js 14 (App Router) application serving both brands, with a shared
-Supabase-backed admin section.
+One Next.js app serving two brand sites, built as a **static site** and hosted
+on **Netlify**. There is no database, no server code and no custom login.
 
-## Routes
+| Path      | What it is                                         |
+| --------- | -------------------------------------------------- |
+| `/`       | Hospo Fresh public site                            |
+| `/tapro`  | Tapro public site                                  |
+| `/privacy`| Shared privacy policy                              |
+| `/admin/` | Tapro product admin (Decap CMS, GitHub login)      |
 
-| Path                          | What it is                                              |
-|--------------------------------|----------------------------------------------------------|
-| `/`                             | Hospo Fresh public marketing site                        |
-| `/tapro`                        | Tapro public marketing site                               |
-| `/admin/login`                  | Shared sign-in (email/password or Google) for both brands |
-| `/admin/dashboard/hospo-fresh`  | Hospo Fresh enquiries (paginated, CSV export)             |
-| `/admin/dashboard/tapro`        | Tapro product manager + Tapro enquiries                   |
+## How it works
 
-## Why three root layouts?
+| Need | How it is done |
+| --- | --- |
+| Product catalogue | `content/products.json` in this repo, photos in `public/products/`. Read at build time. |
+| Editing products | Decap CMS at `/admin/`. Saving commits to GitHub; Netlify rebuilds (live in 1–2 minutes). |
+| Admin login | GitHub accounts with **write access to this repo**. Nothing else can sign in. |
+| Contact forms | Netlify Forms (`hospo-enquiry`, `tapro-enquiry`). Stored in Netlify, emailed to the team. |
+| Spam | Netlify honeypot field + Akismet filtering. |
+| Hosting | `next build` writes static files to `out/`; Netlify serves them from its CDN. |
 
-Hospo Fresh, Tapro, and the admin section each have their own
-`layout.tsx` that renders its own `<html>`/`<body>`, via Next.js route
-groups: `app/(hospo)/`, `app/(tapro)/tapro/`, `app/(admin)/admin/`.
+Why no database: products change a few times a year and look the same to every
+visitor, so they are content, not live data. Enquiries are rare and only need to
+reach a person. Removing the server removes the whole class of runtime risks
+(auth bypass, data exposure, a paused database taking the site down).
 
-This is the deliberate fix for the biggest risk in merging two
-independently-styled sites into one app: both original codebases defined
-global CSS custom properties and admin class names (`--green`, `--gold`,
-`.admin-shell`, `.login-card`, `.btn-primary`, etc.) with **different
-values for the same names**. A single shared `globals.css` would have
-silently broken one brand's admin styling or the other's public site the
-moment both were mounted in the same document. Separate root layouts give
-each brand (and the shared admin tool) its own isolated stylesheet and
-font set, and force a full document navigation between `/` and `/tapro`
-instead of a soft client-side transition that could otherwise leak styles.
+### Important files
 
-## What changed vs. the original two codebases
+| File | Purpose |
+| --- | --- |
+| `content/products.json` | The Tapro product list, in display order. |
+| `public/admin/config.yml` | Decap CMS setup: repo, fields, image folder. |
+| `public/admin/index.html` | Admin page. Loads Decap pinned to 3.16.3 with an integrity hash. |
+| `public/__forms.html` | Hidden copies of both forms so Netlify can detect them. Keep field names in sync with the React forms. |
+| `lib/enquiry.ts` | Form validation and submission to Netlify. |
+| `lib/products.ts` | Loads and checks `products.json`; a malformed file fails the build instead of breaking the live site. |
+| `lib/csp.ts` | Content-Security-Policy for public pages. |
+| `netlify.toml` | Build settings, security headers, old admin URL redirects. |
 
-**Security (see the original code review):**
-- Added `middleware.ts` (was missing from Hospo Fresh) refreshing the
-  Supabase session and gating `/admin/dashboard/*` for both brands.
-- Added an explicit `if (!user) redirect('/admin/login')` inside each
-  dashboard page as defense-in-depth, in case the middleware matcher is
-  ever edited.
-- Fixed CSV/formula injection in the enquiries export (`lib/csv.ts`) —
-  cells starting with `= + - @` are now prefixed with `'` before export.
-- Added a honeypot + submission-speed heuristic to **both** contact forms
-  (Tapro's had neither) and a best-effort in-memory rate limiter
-  (`lib/rate-limit.ts` — read its comment; swap in Upstash + Turnstile
-  before a high-traffic public launch).
-- Server actions now log real errors server-side (`lib/log.ts`) instead of
-  swallowing them, while still returning generic messages to the client.
-- Tightened server-side validation on all form/product inputs (length
-  caps, image URL must point at our own Storage bucket).
+## Day-to-day: editing products
 
-**Data model:**
-- Hospo Fresh's `hospo_inquiries` and Tapro's `inquiries` tables are
-  merged into one `inquiries` table with a `brand` column — see
-  `supabase/schema.sql` for the schema and a migration script for existing
-  data.
-- Tapro's contact-form submissions previously had **no admin view at
-  all** — they went into the database with nobody able to read them
-  through the UI. Fixed: they now show up in the Tapro dashboard.
+1. Go to `https://<your-domain>/admin/` and choose **Login with GitHub**.
+2. Open **Tapro → Products**. Add, edit, delete, or drag to reorder.
+3. Press **Publish**. The live site updates in about 1–2 minutes.
 
-**Consistency:**
-- One shared login page, one shared `logout()`/`login()` action, one
-  Supabase client pair (`lib/supabase-server.ts` / `lib/supabase-browser.ts`).
-- A single admin design system (`app/admin.css`) replaces the two
-  independently-built (and colliding) admin skins.
-- Cross-links between the sites (`Header.tsx` in each) now point at the
-  internal `/` and `/tapro` routes instead of hardcoded external
-  `*.vercel.app` URLs.
+Photos: JPEG, PNG or WebP, under 1 MB, about 1200 px wide; portrait (4:5) crops best.
+The site shows photos exactly as uploaded, so oversized files slow it down.
 
-## Setup
+Each publish is one Netlify production build. Batch several edits into one
+publish where you can, to stay well inside the free plan's monthly credits.
 
-1. `npm install`
-2. Copy `.env.example` to `.env.local` and fill in your Supabase project URL/anon key.
-3. Run `supabase/schema.sql` in the Supabase SQL editor (adjust if migrating existing data — see the note at the bottom of that file).
-4. Create a **public** Storage bucket named `product-images`.
-5. If using Google sign-in, enable the Google provider in Supabase Auth and set the authorized redirect URI to `<your-domain>/auth/callback`.
-6. `npm run dev`
+To add another admin: GitHub → this repo → **Settings → Collaborators** → invite
+their GitHub account with write access. Remove them the same way.
 
-## Round 2 — closing the "safe for public traffic" gaps
+## Day-to-day: enquiries
 
-The first version fixed the specific vulnerabilities from the code review
-(auth bypass, CSV injection, missing Tapro admin view). It was **not** yet
-what I'd call production-grade for real public traffic. This round closes
-the gaps that actually matter at this scale, and explicitly skips the ones
-that don't.
+Netlify dashboard → your site → **Forms**. Each form lists its submissions;
+the **⋯** menu exports CSV. Email alerts are set in **Forms → Form notifications**.
 
-**Added, because they were real gaps:**
-- `lib/rate-limit.ts` now uses Upstash Redis. The previous in-memory version
-  does not work on serverless — each request can land on a different,
-  memory-isolated instance, so it was rate-limiting almost nothing. Set
-  `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (free tier) before
-  launch, or you're back to no real protection.
-- Cloudflare Turnstile (`lib/turnstile.ts`, `components/shared/TurnstileWidget.tsx`)
-  on both contact forms. The honeypot + timing check only stopped the
-  laziest bots; this is the layer that stops a real scripted spammer.
-- Security headers + a CSP in `next.config.js` (HSTS, X-Content-Type-Options,
-  X-Frame-Options, Referrer-Policy, Permissions-Policy). Read the comment
-  above the CSP constant — it documents an honest tradeoff (`'unsafe-inline'`
-  on script-src/style-src) rather than pretending it's a strict nonce-based
-  policy, and says exactly why and what a stricter version would require.
-- `next/image` remotePatterns and the CSP's `img-src` are now pinned to your
-  actual Supabase project hostname (parsed from `NEXT_PUBLIC_SUPABASE_URL`
-  at build time) instead of a `*.supabase.co` wildcard.
-- A privacy policy page (`/privacy`, linked from both brands' footers and
-  both contact forms) — you're collecting name/email/phone through public
-  forms with no disclosure anywhere, which is a real compliance gap, not a
-  cosmetic one.
-- An admin audit log (`admin_audit_log` table + `lib/audit.ts`) recording
-  who created/edited/deleted a product and when. No UI was built for it on
-  purpose — query it directly in Supabase's Table Editor when needed; a
-  full audit viewer would be over-engineering for one admin user.
-- `.github/workflows/ci.yml` — typecheck + build on every PR. This is the
-  floor, not a full test suite (see below).
-- Mobile responsiveness pass on the admin dashboard specifically (the topbar,
-  product rows, and login card didn't have their own mobile breakpoints —
-  the public sites already did).
+## One-time setup on Netlify
 
-**Deliberately not added — this would be over-engineering at this scale:**
-- **Nonce-based strict CSP.** The right long-term answer, but it requires
-  threading a per-request nonce through every layout and script tag, and
-  getting it wrong silently breaks the site (blank page) in a way I can't
-  verify without a live browser test against your real deployment. Ship the
-  pragmatic CSP above; revisit this if the app starts handling anything more
-  sensitive than contact-form enquiries.
-- **MFA on admin login.** Supabase supports it if you ever want it, but for
-  a single admin user it's friction without much real payoff yet.
-- **Cookie-consent banner.** This app sets no tracking or advertising
-  cookies — only the functional Supabase auth session cookie, which is
-  exempt from consent requirements under GDPR/ePrivacy as "strictly
-  necessary." A banner here would be theater. Turnstile's own data use is
-  disclosed on the `/privacy` page instead.
-- **A full automated test suite.** Worth doing as the app grows past two
-  brands and one admin; not worth blocking this launch on. CI currently
-  gates on typecheck + build, which catches the class of bug most likely to
-  actually ship (broken imports, type mismatches, a route that fails to
-  render).
-- Replacing the two `<img>` tags in the Hospo Fresh header/footer with
-  `next/image` — they're small static logo assets with no meaningful
-  optimization to gain.
+Do these in an account owned by you or the business, never a shared password.
 
-## Setup, round 2 additions
+1. **Create the site.** Sign up at netlify.com with *Sign up with GitHub*.
+   **Add new site → Import an existing project → GitHub → `hospo-tapro`.**
+   Build settings come from `netlify.toml`; leave them as detected.
+2. **Check it** on the `*.netlify.app` address: both brands, `/privacy`, and a
+   test enquiry from each form.
+3. **Enable forms** if needed: **Forms → Enable form detection**, then
+   redeploy (**Deploys → Trigger deploy**). Both `hospo-enquiry` and
+   `tapro-enquiry` should appear under Forms.
+4. **Email alerts:** **Forms → Form notifications → Add notification → Email**,
+   to `info@hospofresh.com.au`, once for each form.
+5. **Admin login (GitHub OAuth):**
+   1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**.
+      Homepage URL: your site URL. Authorization callback URL:
+      `https://api.netlify.com/auth/done`.
+   2. Copy the **Client ID** and generate a **Client secret**.
+   3. Netlify → **Site configuration → Access & security → OAuth → Install provider →
+      GitHub**, paste both values.
+   4. Open `/admin/`, sign in, and publish a small test edit.
+6. **Turn on two-factor authentication** on the GitHub and Netlify accounts.
+   Together they are the whole security boundary.
+7. **Make the repo private** (GitHub → Settings → General → Danger Zone).
+   Decap and Netlify both work with private repos.
 
-7. Sign up for [Upstash](https://upstash.com) (free tier), create a Redis database, and set `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`.
-8. Sign up for [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free), create a widget for your domain, and set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`.
+### Connecting the GoDaddy domain
+
+1. The previous host removes the domain from their Netlify site.
+2. In this site: **Domain management → Add a domain**. Make `www` the primary
+   domain (Netlify recommends this with external DNS). If asked to verify
+   ownership, add the TXT record it shows in GoDaddy.
+3. In GoDaddy → **DNS**: first confirm the nameservers are GoDaddy's. Then:
+
+   | Type  | Name  | Value                         |
+   | ----- | ----- | ----------------------------- |
+   | A     | `@`   | `75.2.60.5`                   |
+   | CNAME | `www` | `<your-site-name>.netlify.app` |
+
+   Delete any other `A`/`AAAA` records on `@` (GoDaddy's "parked" record breaks this).
+4. Netlify issues the HTTPS certificate automatically once DNS resolves
+   (minutes, up to 48 hours).
+
+## Migrating data out of Supabase (one time)
+
+Resume the paused project in the Supabase dashboard first, then:
+
+**Products.** In the SQL editor, run:
+
+```sql
+select json_build_object(
+  'products',
+  coalesce(json_agg(
+    json_strip_nulls(json_build_object(
+      'name', name,
+      'volume', nullif(volume, ''),
+      'description', nullif(description, ''),
+      'image', nullif(regexp_replace(image_url, '^.*/product-images/', '/products/'), '')
+    )) order by sort_order
+  ), '[]'::json)
+) as products_json
+from public.products;
+```
+
+Copy the result into `content/products.json`. Then **Storage → product-images**,
+download every file, and upload them unchanged into `public/products/` (on
+GitHub: open the folder → **Add file → Upload files**). File names must match the
+`image` paths in the JSON.
+
+**Enquiries.** **Table Editor → inquiries → Export → CSV**. Keep this file
+private (not in this repo): it contains customer personal data.
+
+When the new site is live and both exports are safely stored, delete the
+Supabase project and the old Vercel project.
+
+## Local development
+
+```bash
+npm install
+npm run dev          # http://localhost:3000 and /tapro
+npm run build        # static site in out/
+npm run lint && npm run typecheck
+```
+
+- **Forms** only work on Netlify (locally they show the "could not be sent"
+  message). To test them locally, use the Netlify CLI: `npx netlify dev`.
+- **Admin locally:** run `npm run cms` in a second terminal, then open
+  `http://localhost:3000/admin/index.html`. Edits write to your local files
+  instead of GitHub.
+
+## Design notes
+
+- **Three root layouts.** Hospo Fresh (`app/(hospo)`) and Tapro
+  (`app/(tapro)/tapro`) each have their own `<html>`, stylesheet and fonts, so
+  their identically named CSS variables never collide.
+- **CSP via `<meta>`.** Netlify does not document how overlapping header rules
+  combine, and the admin needs a looser policy than the public pages. Each page
+  therefore carries its own policy; see `lib/csp.ts`.
+- **Self-hosted fonts** (`app/fonts`, SIL Open Font License): the build never
+  depends on Google Fonts, and visitors make no requests to Google.
+
+## Known limitations
+
+- Next.js 14 is past its support window. As a static export it only runs at
+  build time on our own code, which removes the runtime risks in its security
+  advisories. Upgrading to a current major is still recommended as a follow-up.
+- No server-side form validation (there is no server). Browser validation helps
+  genuine visitors; spam is handled by Netlify's filters. Netlify also supports
+  reCAPTCHA if spam ever becomes a problem.
+- Photos on the Hospo Fresh site are hotlinked from Unsplash. Self-host the
+  ones you keep.
+- The Tapro logo in the Hospo Fresh header is cropped from the hero artwork
+  (120×49 px), so it is slightly soft on high-density screens. Replace
+  `public/tapro-logo.png` with the original logo file (SVG or 2× PNG) when available.

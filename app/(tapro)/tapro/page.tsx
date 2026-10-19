@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase-server';
-import type { Product } from '@/lib/types';
+import { getProducts } from '@/lib/products';
 import Header from '@/components/tapro/Header';
 import Hero from '@/components/tapro/Hero';
 import Manifesto from '@/components/tapro/Manifesto';
@@ -10,28 +9,26 @@ import Values from '@/components/tapro/Values';
 import Contact from '@/components/tapro/Contact';
 import Footer from '@/components/tapro/Footer';
 
-export const revalidate = 0;
-
-export default async function TaproHomePage() {
-  const supabase = createClient();
-  const [{ data: productData }, { data: userData }] = await Promise.all([
-    supabase.from('products').select('*').order('sort_order', { ascending: true }),
-    supabase.auth.getUser(),
-  ]);
-
-  const products = (productData ?? []) as Product[];
-  const isAdmin = !!userData.user;
+// Rendered once at build time. Editing products in the admin commits to
+// GitHub, which triggers a Netlify rebuild with the new list.
+export default function TaproHomePage() {
+  const products = getProducts();
 
   return (
     <>
-      <Header isAdmin={isAdmin} />
-      <Hero />
-      <Manifesto productCount={products.length} />
-      <Marquee />
-      <ProductGrid products={products} />
-      <Heritage />
-      <Values />
-      <Contact />
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
+      <Header />
+      <main id="main" tabIndex={-1}>
+        <Hero />
+        <Manifesto productCount={products.length} />
+        <Marquee />
+        <ProductGrid products={products} />
+        <Heritage />
+        <Values />
+        <Contact />
+      </main>
       <Footer />
     </>
   );

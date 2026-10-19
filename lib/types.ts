@@ -1,31 +1,12 @@
-export type Brand = 'hospo_fresh' | 'tapro';
-
-export type Inquiry = {
-  id: string;
-  brand: Brand;
-  name: string;
-  email: string;
-  business: string | null;
-  phone: string | null;
-  enquiry_type: string | null;
-  message: string;
-  created_at: string;
-};
-
+// A Tapro product, as stored in content/products.json and edited in the
+// Decap CMS admin (see public/admin/config.yml for the matching fields).
+// The order of the list is the display order on the site.
 export type Product = {
-  id: string;
   name: string;
-  volume: string;
-  description: string;
-  image_url: string;
-  sort_order: number;
-  created_at: string;
+  volume?: string;
+  description?: string;
+  /** Site-relative path to the photo, e.g. "/products/red-kochchi.webp". */
+  image?: string;
 };
 
-export type ProductInput = {
-  name: string;
-  volume: string;
-  description: string;
-  image_url: string;
-  sort_order: number;
-};
+export type Brand = 'hospo' | 'tapro';

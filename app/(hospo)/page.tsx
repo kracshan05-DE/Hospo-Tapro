@@ -1,18 +1,15 @@
 import ContactForm from '@/components/hospo/ContactForm';
 import Header from '@/components/hospo/Header';
-import { createClient } from '@/lib/supabase-server';
 
-export default async function HomePage() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+export default function HomePage() {
   return (
     <>
-      <Header isAdmin={!!user} />
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
+      <Header />
 
-      <main>
+      <main id="main" tabIndex={-1}>
         <section className="hero">
           <div className="hero-content">
             <div className="eyebrow">Built for busy kitchens</div>
@@ -108,7 +105,7 @@ export default async function HomePage() {
               { title: 'Sauces & Condiments', desc: 'Essential pantry flavours.', img: 'https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=800&q=80' },
               { title: 'Frozen Foods', desc: 'Convenient ingredients for busy service.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80' },
               { title: 'Nuts & Dried Fruit', desc: 'For cooking, baking and serving.', img: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&w=800&q=80' },
-              { title: 'Packaging & Takeaway', desc: 'Practical solutions for takeaway service.', img: '/packaging-image.png' },
+              { title: 'Packaging & Takeaway', desc: 'Practical solutions for takeaway service.', img: '/packaging.webp' },
               { title: 'Hospitality Essentials', desc: 'Useful supplies for day-to-day operations.', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=800&q=80' },
             ].map((p) => (
               <div className="card" key={p.title}>
@@ -250,7 +247,7 @@ export default async function HomePage() {
               <p>
                 <b>Phone</b>
                 <br />
-                <a href="tel:0493449072">0493 449 072</a>
+                <a href="tel:+61493449072">0493 449 072</a>
               </p>
               <p>
                 <b>Email</b>
@@ -289,7 +286,7 @@ export default async function HomePage() {
           </div>
           <div>
             <h4>Contact</h4>
-            <a href="tel:0493449072">0493 449 072</a>
+            <a href="tel:+61493449072">0493 449 072</a>
             <a href="mailto:info@hospofresh.com.au">info@hospofresh.com.au</a>
             <a href="#contact">Cranbourne West, VIC</a>
             <a href="/privacy">Privacy Policy</a>

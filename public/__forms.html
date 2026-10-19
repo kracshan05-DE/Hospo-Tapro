@@ -1,0 +1,40 @@
+<!doctype html>
+<!--
+  Netlify Forms registration file. Visitors never see this page.
+
+  Netlify scans static HTML at deploy time to discover forms. The site's real
+  forms are React components (components/hospo/ContactForm.tsx and
+  components/tapro/Contact.tsx), which Netlify cannot scan, so these hidden
+  copies declare each form's name and fields. The React forms POST to this
+  file (see lib/enquiry.ts).
+
+  Keep the field names in sync with the React forms: Netlify ignores any
+  field that is not declared here.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Forms</title>
+  </head>
+  <body>
+    <form name="hospo-enquiry" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="hospo-enquiry" />
+      <input name="bot-field" />
+      <input name="name" />
+      <input type="email" name="email" />
+      <input name="business" />
+      <input name="phone" />
+      <input name="enquiry" />
+      <textarea name="message"></textarea>
+    </form>
+
+    <form name="tapro-enquiry" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="tapro-enquiry" />
+      <input name="bot-field" />
+      <input name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+    </form>
+  </body>
+</html>

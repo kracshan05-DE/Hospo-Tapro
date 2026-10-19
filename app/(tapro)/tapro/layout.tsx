@@ -1,18 +1,26 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Montserrat } from 'next/font/google';
+import localFont from 'next/font/local';
+import { SITE_CSP } from '@/lib/csp';
 import './globals.css';
 
-const serif = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
+// Fonts are self-hosted (files in app/fonts, SIL Open Font License) instead of
+// fetched from Google Fonts at build time: the build never depends on an
+// external service, and no visitor request goes to Google.
+const serif = localFont({
+  src: [
+    { path: '../../fonts/cormorant-garamond-latin-wght-normal.woff2', weight: '300 700', style: 'normal' },
+    { path: '../../fonts/cormorant-garamond-latin-wght-italic.woff2', weight: '300 700', style: 'italic' },
+  ],
   variable: '--font-serif',
+  display: 'swap',
 });
 
-const sans = Montserrat({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+const sans = localFont({
+  src: '../../fonts/montserrat-latin-wght-normal.woff2',
+  weight: '100 900',
+  style: 'normal',
   variable: '--font-sans',
+  display: 'swap',
 });
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
@@ -29,15 +37,14 @@ export const metadata: Metadata = {
   },
 };
 
-// Independent root layout for Tapro (own <html>/<body>, own fonts, own CSS
-// variables). Because this is a separate root layout from Hospo Fresh's and
-// the admin section's, its :root color tokens (--red, --gold, --ink, etc.)
-// never collide with Hospo Fresh's or the admin theme's tokens of the same
-// name, and client-side navigation between "/" and "/tapro" triggers a full
-// document swap rather than a soft navigation that could leak styles.
+// Independent root layout for Tapro (own <html>/<body>, fonts and CSS
+// variables), so its tokens never collide with Hospo Fresh's.
 export default function TaproRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
+      <head>
+        <meta httpEquiv="Content-Security-Policy" content={SITE_CSP} />
+      </head>
       <body>{children}</body>
     </html>
   );
