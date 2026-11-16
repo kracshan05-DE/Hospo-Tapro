@@ -2,6 +2,7 @@
 
 import { after } from 'next/server';
 import { headers } from 'next/headers';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { deliverNotification, type EmailRecord } from '@/lib/inquiry-notify';
 import { logServerError } from '@/lib/log';
@@ -43,16 +44,14 @@ async function submitInquiry(brand: Brand, formData: FormData): Promise<InquiryR
   const parsed = parseInquiry(brand, formData);
   if (!parsed.ok) return parsed;
 
-  let saved;
+  // The id is generated here so the row never has to be read back: this
+  // keeps the insert working with or without the service-role key.
+  const saved = { id: crypto.randomUUID(), created_at: new Date().toISOString(), ...parsed.value };
+  const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+
   try {
-    const db = createAdminClient();
-    const { data, error } = await db
-      .from('inquiries')
-      .insert(parsed.value)
-      .select('id, brand, name, email, business, phone, enquiry_type, message, created_at')
-      .single();
-    if (error || !data) throw error ?? new Error('Insert returned no row');
-    saved = data;
+    const { error } = await (hasServiceKey ? createAdminClient() : anonClient()).from('inquiries').insert(saved);
+    if (error) throw error;
   } catch (error) {
     logServerError('inquiries.submit', error);
     return {
@@ -62,16 +61,29 @@ async function submitInquiry(brand: Brand, formData: FormData): Promise<InquiryR
   }
 
   after(async () => {
-    const db = createAdminClient();
     await deliverNotification(saved, {
       record: async (id, update: EmailRecord) => {
-        const { error } = await db.from('inquiries').update(update).eq('id', id);
+        // Delivery status can only be recorded with the service-role key.
+        if (!hasServiceKey) return;
+        const { error } = await createAdminClient().from('inquiries').update(update).eq('id', id);
         if (error) throw error;
       },
     });
   });
 
   return { ok: true };
+}
+
+// Transitional safety net: if SUPABASE_SERVICE_ROLE_KEY hasn't been set in
+// the deployment yet, save with the public anon key instead. That only works
+// while the database still allows anonymous inserts (before the security
+// migration); afterwards the service-role key is required. Either way the
+// database's RLS decides, so this never widens access.
+function anonClient() {
+  logServerError('inquiries.submit', 'SUPABASE_SERVICE_ROLE_KEY is not set; using anon fallback');
+  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: { persistSession: false },
+  });
 }
 
 export async function submitHospoInquiry(formData: FormData): Promise<InquiryResult> {

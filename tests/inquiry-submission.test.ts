@@ -10,34 +10,30 @@ vi.mock('@/lib/rate-limit', () => ({ isRateLimited: vi.fn(async () => false), is
 const sendMock = vi.fn();
 vi.mock('@/lib/email', () => ({ sendInquiryNotification: (...args: unknown[]) => sendMock(...args) }));
 
-const inserted: Record<string, unknown>[] = [];
+const inserted: { via: string; row: Record<string, unknown> }[] = [];
 const updates: { id: string; values: Record<string, unknown> }[] = [];
 let insertError: Error | null = null;
 
-vi.mock('@/lib/supabase-admin', () => ({
-  createAdminClient: () => ({
-    from: (table: string) => {
-      expect(table).toBe('inquiries');
-      return {
-        insert: (row: Record<string, unknown>) => ({
-          select: () => ({
-            single: async () => {
-              if (insertError) return { data: null, error: insertError };
-              inserted.push(row);
-              return { data: { id: 'inq-1', created_at: '2026-11-16T10:00:00Z', ...row }, error: null };
-            },
-          }),
-        }),
-        update: (values: Record<string, unknown>) => ({
-          eq: async (_col: string, id: string) => {
-            updates.push({ id, values });
-            return { error: null };
-          },
-        }),
-      };
-    },
-  }),
-}));
+const fakeClient = (via: string) => ({
+  from: (table: string) => {
+    expect(table).toBe('inquiries');
+    return {
+      insert: async (row: Record<string, unknown>) => {
+        if (insertError) return { error: insertError };
+        inserted.push({ via, row });
+        return { error: null };
+      },
+      update: (values: Record<string, unknown>) => ({
+        eq: async (_col: string, id: string) => {
+          updates.push({ id, values });
+          return { error: null };
+        },
+      }),
+    };
+  },
+});
+vi.mock('@/lib/supabase-admin', () => ({ createAdminClient: () => fakeClient('service') }));
+vi.mock('@supabase/supabase-js', () => ({ createClient: () => fakeClient('anon') }));
 vi.spyOn(console, 'error').mockImplementation(() => {});
 
 const { submitTaproInquiry, submitHospoInquiry } = await import('@/app/actions/inquiries');
@@ -55,6 +51,7 @@ async function runAfter() {
 }
 
 beforeEach(() => {
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
   afterCallbacks.length = 0;
   inserted.length = 0;
   updates.length = 0;
@@ -69,17 +66,18 @@ describe('contact form submission', () => {
 
     expect(result).toEqual({ ok: true });
     expect(inserted).toHaveLength(1);
-    expect(inserted[0]).toMatchObject({ brand: 'tapro', name: 'Jane Buyer', email: 'jane@cafe.com.au' });
+    expect(inserted[0].via).toBe('service');
+    expect(inserted[0].row).toMatchObject({ brand: 'tapro', name: 'Jane Buyer', email: 'jane@cafe.com.au' });
 
     await runAfter();
-    expect(updates).toEqual([{ id: 'inq-1', values: { email_status: 'failed', email_error: 'Resend unreachable' } }]);
+    expect(updates).toEqual([{ id: inserted[0].row.id, values: { email_status: 'failed', email_error: 'Resend unreachable' } }]);
   });
 
   it('records a failed status when Resend rejects the email', async () => {
     sendMock.mockResolvedValue({ ok: false, error: 'Resend 403: domain not verified' });
     expect(await submitHospoInquiry(validForm())).toEqual({ ok: true });
     await runAfter();
-    expect(inserted[0]).toMatchObject({ brand: 'hospo_fresh' });
+    expect(inserted[0].row).toMatchObject({ brand: 'hospo_fresh' });
     expect(updates[0].values).toMatchObject({ email_status: 'failed', email_error: 'Resend 403: domain not verified' });
   });
 
@@ -98,6 +96,17 @@ describe('contact form submission', () => {
     if (!result.ok) expect(result.error).toContain('info@hospofresh.com.au');
     await runAfter();
     expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it('still saves (via the anon fallback) when the service-role key is not configured', async () => {
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    sendMock.mockResolvedValue({ ok: true, id: 'email_1' });
+    expect(await submitTaproInquiry(validForm())).toEqual({ ok: true });
+    expect(inserted).toHaveLength(1);
+    expect(inserted[0].via).toBe('anon');
+    await runAfter();
+    expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(updates).toHaveLength(0); // delivery status needs the service-role key
   });
 
   it('never saves invalid input', async () => {
