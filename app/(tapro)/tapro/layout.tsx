@@ -1,19 +1,36 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Montserrat } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { SITE_URL } from '@/lib/site';
 
-const serif = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
+// Fonts are bundled with the app (Fontsource builds of the Google Fonts
+// originals, SIL Open Font License) instead of being downloaded from Google
+// at build time, which made Vercel builds fail whenever that download did.
+const cormorant = localFont({
+  src: [
+    { path: './fonts/cormorant-garamond-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/cormorant-garamond-latin-400-italic.woff2', weight: '400', style: 'italic' },
+    { path: './fonts/cormorant-garamond-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/cormorant-garamond-latin-500-italic.woff2', weight: '500', style: 'italic' },
+    { path: './fonts/cormorant-garamond-latin-600-normal.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/cormorant-garamond-latin-600-italic.woff2', weight: '600', style: 'italic' },
+  ],
   variable: '--font-serif',
+  display: 'swap',
+  fallback: ['Georgia', 'serif'],
 });
 
-const sans = Montserrat({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+const montserrat = localFont({
+  src: [
+    { path: './fonts/montserrat-latin-300-normal.woff2', weight: '300', style: 'normal' },
+    { path: './fonts/montserrat-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/montserrat-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/montserrat-latin-600-normal.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/montserrat-latin-700-normal.woff2', weight: '700', style: 'normal' },
+  ],
   variable: '--font-sans',
+  display: 'swap',
+  fallback: ['Helvetica Neue', 'Arial', 'sans-serif'],
 });
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
@@ -41,7 +58,7 @@ export const metadata: Metadata = {
 // document swap rather than a soft navigation that could leak styles.
 export default function TaproRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable}`}>
+    <html lang="en" className={`${cormorant.variable} ${montserrat.variable}`}>
       <body>{children}</body>
     </html>
   );
