@@ -1,5 +1,6 @@
 import ContactForm from '@/components/hospo/ContactForm';
 import Header from '@/components/hospo/Header';
+import DeveloperCredit from '@/components/shared/DeveloperCredit';
 import { createClient } from '@/lib/supabase-server';
 
 export default async function HomePage() {
@@ -295,7 +296,10 @@ export default async function HomePage() {
             <a href="/privacy">Privacy Policy</a>
           </div>
         </div>
-        <div className="copyright">© {new Date().getFullYear()} Hospo Fresh. All rights reserved.</div>
+        <div className="copyright">
+          <span>© {new Date().getFullYear()} Hospo Fresh. All rights reserved.</span>
+          <DeveloperCredit />
+        </div>
       </footer>
     </>
   );

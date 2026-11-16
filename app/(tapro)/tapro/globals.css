@@ -344,6 +344,9 @@ section { position: relative; padding: clamp(48px, 6vw, 88px) 0; }
 
 footer.site-footer { background: var(--ink); color: #8a7c6c; text-align: center; padding: 34px 6vw 44px; font-size: .7rem; letter-spacing: .08em; border-top: 1px solid rgba(187,133,49,.2); }
 footer.site-footer .flogo { font-family: var(--serif); font-style: italic; color: var(--gold-light); font-size: 1.1rem; margin-bottom: 8px; display: block; }
+footer.site-footer .fcredit { display: block; margin-top: 10px; }
+footer.site-footer a { color: var(--gold-light); text-decoration: underline; text-underline-offset: 2px; }
+footer.site-footer a:hover, footer.site-footer a:focus-visible { color: var(--cream); }
 
 @media (max-width: 640px) {
   .wrap { padding: 0 7vw; }
