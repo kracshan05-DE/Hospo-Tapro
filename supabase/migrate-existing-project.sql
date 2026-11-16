@@ -1,3 +1,7 @@
+-- HISTORICAL: original setup script, kept for reference only.
+-- The live database is managed by supabase/migrations/ (see docs/OPERATIONS.md).
+-- Do NOT re-run this against production.
+
 -- Run this in the SQL Editor of your EXISTING Supabase project
 -- (menywvdaswxfqrbvicqw.supabase.co) — NOT supabase/schema.sql, which
 -- assumes a blank database and would silently skip your live `inquiries`

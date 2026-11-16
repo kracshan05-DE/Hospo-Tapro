@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Reveal from './Reveal';
 import type { Product } from '@/lib/types';
 
-export default function ProductGrid({ products }: { products: Product[] }) {
+export default function ProductGrid({ products, unavailable = false }: { products: Product[]; unavailable?: boolean }) {
   return (
     <section id="collection">
       <div className="wrap">
@@ -22,7 +22,11 @@ export default function ProductGrid({ products }: { products: Product[] }) {
       </div>
 
       <div className="grid">
-        {products.length === 0 && <div className="empty-collection">More products are on the way.</div>}
+        {unavailable ? (
+          <div className="empty-collection">Our collection is temporarily unavailable. Please check back shortly.</div>
+        ) : (
+          products.length === 0 && <div className="empty-collection">More products are on the way.</div>
+        )}
         {products.map((p, i) => (
           <Reveal as="div" delay={i % 3} key={p.id} className="card">
             <div className="num">{String(i + 1).padStart(2, '0')}</div>

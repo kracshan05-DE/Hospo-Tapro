@@ -1,98 +1,76 @@
 'use server';
 
-import { createClient } from '@/lib/supabase-server';
+import { after } from 'next/server';
+import { headers } from 'next/headers';
+import { createAdminClient } from '@/lib/supabase-admin';
+import { deliverNotification, type EmailRecord } from '@/lib/inquiry-notify';
 import { logServerError } from '@/lib/log';
 import { isRateLimited, isSuspiciouslyFast } from '@/lib/rate-limit';
 import { verifyTurnstile } from '@/lib/turnstile';
-import { headers } from 'next/headers';
+import { parseInquiry } from '@/lib/validation';
 import type { Brand } from '@/lib/types';
 
 export type InquiryResult = { ok: true } | { ok: false; error: string };
 
-// RFC 5322-derived, pragmatic pattern (the one HTML5's <input type="email">
-// uses under the hood): requires a proper local@domain.tld shape, no spaces,
-// valid domain label lengths. It confirms the string is SHAPED like an
-// email address — it cannot and should not try to confirm the address is
-// real or reachable; that would need sending a verification email, which is
-// a different feature, not form validation.
-const EMAIL_RE =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-
-// Loose on purpose — international phone formats vary widely (spaces,
-// dashes, parentheses, leading +). This only rejects things that plainly
-// aren't a phone number (letters, way too short/long), not a specific format.
-const PHONE_RE = /^[+()\d\s-]{7,20}$/;
-
-// At least one letter, so purely numeric or symbol-only garbage in the name
-// field is rejected — this is a format check, not a "this looks fake" check.
-const HAS_LETTER_RE = /[a-zA-Z]/;
-
-// Shared handler for both brands' public contact forms. Both forms post into
-// the same `inquiries` table (see supabase/schema.sql), distinguished by `brand`.
+// Shared handler for both brands' public contact forms.
+//
+// Order matters:
+//   1. bot checks + validation
+//   2. SAVE the inquiry (service role; anonymous inserts are blocked by RLS)
+//   3. reply to the visitor
+//   4. send the email notification AFTER the response (next/server `after`)
+// An email failure therefore can never lose an inquiry or show the visitor an
+// error; it is recorded on the row and can be re-sent from the dashboard.
 async function submitInquiry(brand: Brand, formData: FormData): Promise<InquiryResult> {
-  const ip = headers().get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const ip = (await headers()).get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
 
   // Honeypot: real visitors never see or fill this hidden field.
-  const honeypot = String(formData.get('bot-field') || '').trim();
-  if (honeypot) return { ok: true }; // pretend success, drop silently
+  if (String(formData.get('bot-field') || '').trim()) return { ok: true };
 
-  // Basic bot-speed heuristic: reject submissions faster than a human could type.
+  // Submissions faster than a human could type are silently dropped.
   const renderedAt = Number(formData.get('form_rendered_at') || 0);
-  if (renderedAt && isSuspiciouslyFast(renderedAt)) {
-    return { ok: true }; // pretend success, drop silently
-  }
+  if (renderedAt && isSuspiciouslyFast(renderedAt)) return { ok: true };
 
-  // Real bot verification (see lib/turnstile.ts) — this is the layer that
-  // actually stops scripted spam; the two checks above only catch the
-  // laziest bots.
   const turnstileToken = String(formData.get('cf-turnstile-response') || '');
-  const humanVerified = await verifyTurnstile(turnstileToken, ip);
-  if (!humanVerified) {
-    return { ok: false, error: 'Verification failed. Please try again.' };
+  if (!(await verifyTurnstile(turnstileToken, ip))) {
+    return { ok: false, error: 'Verification failed. Please refresh the page and try again.' };
   }
 
   if (await isRateLimited(`inquiry:${brand}:${ip}`)) {
     return { ok: false, error: 'Too many submissions. Please try again in a minute.' };
   }
 
-  const name = String(formData.get('name') || '').trim();
-  const email = String(formData.get('email') || '').trim();
-  const business = String(formData.get('business') || '').trim();
-  const phone = String(formData.get('phone') || '').trim();
-  const enquiry_type = String(formData.get('enquiry') || '').trim();
-  const message = String(formData.get('message') || '').trim();
+  const parsed = parseInquiry(brand, formData);
+  if (!parsed.ok) return parsed;
 
-  if (!name || !email || !message) {
-    return { ok: false, error: 'Please fill in your name, email and message.' };
-  }
-  if (name.length < 2 || name.length > 200 || !HAS_LETTER_RE.test(name)) {
-    return { ok: false, error: 'Please enter your full name.' };
-  }
-  if (!EMAIL_RE.test(email) || email.length > 254) {
-    return { ok: false, error: 'Please enter a valid email address.' };
-  }
-  if (phone && !PHONE_RE.test(phone)) {
-    return { ok: false, error: 'Please enter a valid phone number.' };
-  }
-  if (message.length < 10 || message.length > 5000) {
-    return { ok: false, error: 'Please enter a message of at least 10 characters.' };
+  let saved;
+  try {
+    const db = createAdminClient();
+    const { data, error } = await db
+      .from('inquiries')
+      .insert(parsed.value)
+      .select('id, brand, name, email, business, phone, enquiry_type, message, created_at')
+      .single();
+    if (error || !data) throw error ?? new Error('Insert returned no row');
+    saved = data;
+  } catch (error) {
+    logServerError('inquiries.submit', error);
+    return {
+      ok: false,
+      error: 'Sorry, we could not send your enquiry. Please try again, or email info@hospofresh.com.au.',
+    };
   }
 
-  const supabase = createClient();
-  const { error } = await supabase.from('inquiries').insert({
-    brand,
-    name,
-    email,
-    business: business || null,
-    phone: phone || null,
-    enquiry_type: enquiry_type || null,
-    message,
+  after(async () => {
+    const db = createAdminClient();
+    await deliverNotification(saved, {
+      record: async (id, update: EmailRecord) => {
+        const { error } = await db.from('inquiries').update(update).eq('id', id);
+        if (error) throw error;
+      },
+    });
   });
 
-  if (error) {
-    logServerError('inquiries.submit', error);
-    return { ok: false, error: 'Something went wrong. Please try again.' };
-  }
   return { ok: true };
 }
 

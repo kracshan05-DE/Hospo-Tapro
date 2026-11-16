@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Montserrat } from 'next/font/google';
 import './globals.css';
+import { SITE_URL } from '@/lib/site';
 
 const serif = Cormorant_Garamond({
   subsets: ['latin'],
@@ -18,6 +19,8 @@ const sans = Montserrat({
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: '/tapro' },
   title: 'Tapro by Hospo Fresh — A New Standard of Excellence',
   description:
     'Premium Sri Lankan sauces, sambols, spices and coconut oil — crafted from island heritage, refined for the modern gourmet table.',
@@ -26,6 +29,7 @@ export const metadata: Metadata = {
     description:
       'Premium Sri Lankan sauces, sambols, spices and coconut oil — crafted from island heritage, refined for the modern gourmet table.',
     type: 'website',
+    url: '/tapro',
   },
 };
 

@@ -1,14 +1,14 @@
 import Header from '@/components/hospo/Header';
 import { createClient } from '@/lib/supabase-server';
 
-export const metadata = { title: 'Privacy Policy | Hospo Fresh Group' };
+export const metadata = { title: 'Privacy Policy | Hospo Fresh Group', alternates: { canonical: '/privacy' } };
 
 // One shared privacy policy for both brands (Hospo Fresh and Tapro), since
 // they're operated by the same company and this app is one codebase.
 // Placed under the Hospo Fresh route group so it inherits that layout/CSS;
 // linked from both brands' footers and contact forms as "/privacy".
 export default async function PrivacyPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,7 +23,7 @@ export default async function PrivacyPage() {
 
           <p style={{ color: 'var(--muted)', marginBottom: 18 }}>
             This policy covers both hospofresh.com.au (Hospo Fresh) and the Tapro collection,
-            operated by the same company. Last updated {new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}.
+            operated by the same company. Last updated 16 November 2026.
           </p>
 
           <h2 style={{ fontSize: 20, margin: '28px 0 10px' }}>What we collect</h2>
@@ -52,6 +52,13 @@ export default async function PrivacyPage() {
               Cloudflare&apos;s privacy policy
             </a>{' '}
             for details.
+          </p>
+
+          <h2 style={{ fontSize: 20, margin: '28px 0 10px' }}>Service providers</h2>
+          <p style={{ color: 'var(--muted)', marginBottom: 12 }}>
+            Enquiries are stored securely with our database provider (Supabase), the website is hosted by
+            Vercel, and a notification of each new enquiry is emailed to our team through Resend. These
+            providers process the information only to deliver these services to us.
           </p>
 
           <h2 style={{ fontSize: 20, margin: '28px 0 10px' }}>How long we keep it</h2>

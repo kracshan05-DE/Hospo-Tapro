@@ -1,5 +1,16 @@
 node_modules
 .next
+out
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets: never commit real environment files (see .env.example)
 .env
-.env.local
-next-env.d.ts.next
+.env.*
+!.env.example
+
+# Database backups contain customer data: never commit them
+*.dump
+*.backup
+backups/

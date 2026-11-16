@@ -1,3 +1,7 @@
+-- HISTORICAL: original setup script, kept for reference only.
+-- The live database is managed by supabase/migrations/ (see docs/OPERATIONS.md).
+-- Do NOT re-run this against production.
+
 -- Unified schema for the Hospo Fresh Group app (Hospo Fresh + Tapro).
 -- Run this in the Supabase SQL editor for a fresh project, or diff it
 -- against your existing tables before applying to a live database.
