@@ -33,11 +33,11 @@ export default function ContactForm() {
       {/* Honeypot field: real visitors never see or fill this in */}
       <input type="text" name="bot-field" tabIndex={-1} autoComplete="off" style={{ display: 'none' }} />
       <input type="hidden" name="form_rendered_at" value={renderedAt.current} />
-      <input required name="name" placeholder="Your name" maxLength={200} />
-      <input required name="email" type="email" placeholder="Email address" maxLength={254} />
-      <input name="business" placeholder="Business name" maxLength={200} />
-      <input name="phone" placeholder="Phone number" maxLength={40} />
-      <select name="enquiry" defaultValue="">
+      <input required name="name" aria-label="Your name" autoComplete="name" placeholder="Your name" maxLength={200} />
+      <input required name="email" type="email" aria-label="Email address" autoComplete="email" placeholder="Email address" maxLength={254} />
+      <input name="business" aria-label="Business name" autoComplete="organization" placeholder="Business name" maxLength={200} />
+      <input name="phone" type="tel" aria-label="Phone number" autoComplete="tel" placeholder="Phone number" maxLength={40} />
+      <select name="enquiry" aria-label="Enquiry type" defaultValue="">
         <option value="">Enquiry type</option>
         <option>Wholesale enquiry</option>
         <option>Product enquiry</option>
@@ -45,7 +45,7 @@ export default function ContactForm() {
         <option>Distribution enquiry</option>
         <option>General enquiry</option>
       </select>
-      <textarea required name="message" placeholder="How can we help?" maxLength={5000} />
+      <textarea required name="message" aria-label="Message" placeholder="How can we help?" maxLength={5000} />
       <div style={{ gridColumn: '1/-1' }}>
         <TurnstileWidget />
       </div>
