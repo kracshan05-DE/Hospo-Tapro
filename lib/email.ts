@@ -105,7 +105,7 @@ export async function sendInquiryNotification(
     return { ok: false, error: 'Email is not configured (RESEND_API_KEY / RESEND_FROM / INQUIRY_NOTIFY_TO).' };
   }
 
-  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://hospofresh.com.au';
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://www.hospofresh.com.au';
   const { subject, text, html, replyTo } = buildInquiryEmail(inquiry, siteUrl);
 
   try {
