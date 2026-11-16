@@ -14,18 +14,10 @@ export default function ProductManager({ initialProducts }: { initialProducts: P
 
   useEffect(() => setProducts(initialProducts), [initialProducts]);
 
-  function pathFromUrl(url: string): string | null {
-    const marker = '/product-images/';
-    const idx = url.indexOf(marker);
-    if (idx === -1) return null;
-    return url.slice(idx + marker.length);
-  }
-
   async function handleDelete(product: Product) {
-    if (!confirm(`Remove "${product.name}" from the collection?`)) return;
+    if (!confirm(`Remove "${product.name}" from the collection? This cannot be undone.`)) return;
     setDeletingId(product.id);
-    const imagePath = product.image_url ? pathFromUrl(product.image_url) : null;
-    const result = await deleteProduct(product.id, imagePath);
+    const result = await deleteProduct(product.id);
     setDeletingId(null);
     if (result.ok) {
       router.refresh();

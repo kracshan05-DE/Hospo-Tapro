@@ -6,7 +6,8 @@ import { createProduct, updateProduct } from '@/app/actions/products';
 import type { Product } from '@/lib/types';
 
 const MAX_FILE_MB = 5;
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+// Must match the storage bucket's allowed types (set in the database migration).
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export default function ProductForm({
   product,
@@ -34,7 +35,7 @@ export default function ProductForm({
     const f = e.target.files?.[0];
     if (!f) return;
     if (!ALLOWED_TYPES.includes(f.type)) {
-      setError('Please choose a JPEG, PNG, WebP or AVIF image.');
+      setError('Please choose a JPEG, PNG or WebP image.');
       return;
     }
     if (f.size > MAX_FILE_MB * 1024 * 1024) {
@@ -118,7 +119,7 @@ export default function ProductForm({
 
       <div className="form-field" style={{ marginBottom: 8 }}>
         <label htmlFor="pimg">Product Photo</label>
-        <input id="pimg" type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={handleFileChange} />
+        <input id="pimg" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} />
       </div>
 
       {preview && (

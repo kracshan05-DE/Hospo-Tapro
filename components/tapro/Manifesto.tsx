@@ -1,6 +1,6 @@
 import Reveal from './Reveal';
 
-export default function Manifesto({ productCount }: { productCount: number }) {
+export default function Manifesto({ productCount }: { productCount: number | null }) {
   return (
     <section id="manifesto">
       <div className="wrap">
@@ -19,10 +19,12 @@ export default function Manifesto({ productCount }: { productCount: number }) {
         </Reveal>
 
         <Reveal delay={3} className="manifesto-marks">
-          <div className="mark">
+          {productCount !== null && productCount > 0 && (
+            <div className="mark">
             <strong>{productCount}+</strong>
             <span>Signature Products</span>
           </div>
+          )}
           <div className="mark">
             <strong>100%</strong>
             <span>Sri Lankan Sourced</span>

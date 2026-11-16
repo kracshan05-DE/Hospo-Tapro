@@ -1,27 +1,27 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-// Guards the shared admin section for BOTH brands. This is the app-layer
-// backstop; Supabase Row Level Security on `inquiries` and `products` is the
-// real security boundary, but this stops an unauthenticated visitor from ever
-// seeing the dashboard shell render in the first place, and keeps the
-// session cookie refreshed on every request (required by @supabase/ssr).
+// Runs on /admin/* only. Keeps the Supabase session cookie refreshed (required
+// by @supabase/ssr) and sends signed-out visitors to the login page before any
+// admin page renders. Admin *authorisation* is checked on each page/action and
+// enforced by Row Level Security in the database.
+const PUBLIC_ADMIN_PATHS = ['/admin/login', '/admin/forgot-password'];
+
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({ request: { headers: request.headers } });
+  let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
+        getAll() {
+          return request.cookies.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          response.cookies.set({ name, value: '', ...options });
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
         },
       },
     }
@@ -32,13 +32,12 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isDashboard = path.startsWith('/admin/dashboard');
-  const isLogin = path.startsWith('/admin/login');
+  const isPublic = PUBLIC_ADMIN_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 
-  if (isDashboard && !user) {
+  if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
-  if (isLogin && user) {
+  if (user && path === '/admin/login' && !request.nextUrl.searchParams.has('error')) {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 

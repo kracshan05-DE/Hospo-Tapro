@@ -1,18 +1,26 @@
 import LogoutButton from './LogoutButton';
 
-export default function AdminTopbar({ active }: { active: 'hospo' | 'tapro' | null }) {
+type Tab = 'inquiries' | 'tapro' | 'account';
+
+const TABS: { id: Tab; href: string; label: string }[] = [
+  { id: 'inquiries', href: '/admin/dashboard/inquiries', label: 'Enquiries' },
+  { id: 'tapro', href: '/admin/dashboard/tapro', label: 'Tapro Products' },
+  { id: 'account', href: '/admin/account', label: 'Account' },
+];
+
+export default function AdminTopbar({ active, email }: { active: Tab | null; email?: string }) {
   return (
     <div className="admin-topbar">
-      <div className="brand-switch">
-        <a href="/admin/dashboard/hospo-fresh" className={active === 'hospo' ? 'active' : ''}>
-          Hospo Fresh
-        </a>
-        <a href="/admin/dashboard/tapro" className={active === 'tapro' ? 'active' : ''}>
-          Tapro
-        </a>
-      </div>
+      <nav className="brand-switch" aria-label="Admin sections">
+        {TABS.map((t) => (
+          <a key={t.id} href={t.href} className={active === t.id ? 'active' : ''} aria-current={active === t.id ? 'page' : undefined}>
+            {t.label}
+          </a>
+        ))}
+      </nav>
       <div className="actions">
-        <a href={active === 'tapro' ? '/tapro' : '/'} target="_blank" rel="noreferrer">
+        {email && <span className="admin-who" title="Signed in as">{email}</span>}
+        <a href={active === 'tapro' ? '/tapro' : '/'} target="_blank" rel="noopener noreferrer">
           View Site ↗
         </a>
         <LogoutButton />
