@@ -44,8 +44,9 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
           {/* No "desktop-only" here on purpose — this stays visible next to
               the logo at every screen size, so it never gets buried inside
               the hamburger menu on mobile. */}
-          <a href="/tapro" className="tapro-mark">
-            Tapro
+          <a href="/tapro" className="tapro-mark" aria-label="Tapro by Hospo Fresh">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/tapro-logo.png" alt="Tapro" width={234} height={98} />
           </a>
           <nav className="nav">
             {LINKS.map((l) => (

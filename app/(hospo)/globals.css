@@ -37,7 +37,9 @@ header{position:relative;background:#fff;border-bottom:1px solid rgba(228,229,22
 .stat:last-child{border:0}
 .stat strong{display:block;font-size:20px;line-height:1.1;color:var(--green)}
 .stat span{color:var(--muted);font-size:12px}
-.tapro-mark{font-weight:700;font-size:13px;padding-left:12px;margin-left:2px;border-left:1px solid var(--line);text-transform:uppercase;letter-spacing:.5px}
+.tapro-mark{display:flex;align-items:center;padding-left:12px;margin-left:2px;border-left:1px solid var(--line);transition:opacity .2s}
+.tapro-mark img{height:34px;width:auto;display:block}
+.tapro-mark:hover,.tapro-mark:focus-visible{opacity:.8}
 section{padding:90px 5%}
 .section-head{max-width:700px;margin-bottom:42px}
 .section-head h2{font-size:42px;line-height:1.1;margin:10px 0;color:#123d61}
@@ -119,6 +121,8 @@ footer{background:#101a14;color:#d4ddd7;padding:55px 5% 25px}
 @media(max-width:600px){
   .top{display:none}
   header{padding:12px 5%}
+  .tapro-mark{padding-left:10px}
+  .tapro-mark img{height:28px}
   .hero{min-height:600px}
   .hero:before{background:linear-gradient(90deg,rgba(5,28,48,.96),rgba(5,28,48,.68)),url("/hero-spices.jpg") center/cover no-repeat}
   .hero p{font-size:16px}
